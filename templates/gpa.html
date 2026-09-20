@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}
+GPA Calculator
+{% endblock %}
+
+{% block content %}
+
+
+<h1>Welcome to the GPA Calculator!</h1>
+<hr>
+<p id="error"></p>
+<p id="gpaerror"></p>
+<p id="hourserror"></p>
+
+<input type="number" id="courseamount" placeholder="How many courses do you want to take?"class="my-input"  min="0">
+<input type="number" id="currentgpa" placeholder="What is your current GPA?"class="my-input"  min="0" max="4.0" >
+<input type="number" id="currenthours" placeholder="How many credit hours have you passed? dont include failed hours" class="my-input"  min="0" max="150">
+<input type="number" id="failedhours" placeholder="how many credit hours  have you failed?" class="my-input"  min="0" max="150">
+
+
+
+ 
+<input type="number" id="targetgpa" placeholder="What is your target GPA this term?"class="myinputGPA my-input"  min="0" max="4"hidden>
+ <div id="targetresult"></div>
+
+
+<div id="container"></div>
+
+<div id="result"></div>
+
+{% endblock %}

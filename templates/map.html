@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+progress map
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Welcome to the Progress Map!</h1>
+ <svg width="1200" height="900" id="map" style="border: 2px solid black;">
+
+    <g id="mapContent">
+
+        <g id="universityCourses">
+
+            <text id="universityCoursesTitle" x="0" y="1000">
+                University Required Courses
+            </text>
+
+            <!-- university courses go here -->
+
+        </g>
+
+
+        <g id="collegeCourses">
+
+            <text id="collegeCoursesTitle" x="900" y="570">
+            
+            </text>
+
+            <!-- college courses go here -->
+
+        </g>
+
+
+        <g id="programCourses">
+
+            <text id="programCoursesTitle" x="510" y="70">
+            </text>
+
+            <!-- program courses go here -->
+
+        </g>
+
+    </g>
+
+</svg>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/mapjs/Imapcontrol.js"></script>
+<script src="/static/js/courses.js"></script>
+<script src="/static/js/generators.js"></script>
+<script src="/static/js/mapjs/functions.js"></script>
+
+<script src="/static/js/mapjs/Colleges.js"></script>
+<script src="/static/js/mapjs/CS.js"></script>
+
+<script src="/static/js/eventlisten.js"></script>
+
+
+{% endblock %}
