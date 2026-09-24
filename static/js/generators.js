@@ -1,5 +1,5 @@
 // University stuff 
-
+let generatedCourses = [];
 
 const universityCourses = document.getElementById("universityCourses");
 const uniTitle = document.getElementById("universityCoursesTitle");
@@ -11,6 +11,14 @@ const uniStartY = parseFloat(uniTitle.getAttribute("y")) + 40 ;
 
 function generateUniCourse(course,x,y) {
     
+    const nodeGroup = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "g"
+    );
+
+    nodeGroup.setAttribute("class", "course-node-group");
+    nodeGroup.setAttribute("id", course + "Group");
+
     const text = document.createElementNS(
     "http://www.w3.org/2000/svg",
     "text"
@@ -33,10 +41,12 @@ text.setAttribute("text-anchor", "middle");
 text.setAttribute("dominant-baseline", "middle");
 
 text.textContent = course;
-universityCourses.appendChild(rect);
-universityCourses.appendChild(text);
-generatedCourses.add(course);
 
+nodeGroup.appendChild(rect);
+nodeGroup.appendChild(text);
+universityCourses.appendChild(nodeGroup);
+
+generatedCourses.push(course);
 }
 
 
@@ -48,28 +58,21 @@ generatedCourses.add(course);
 
 
 // Generate university courses
-function generateUniCourses() {
- generateUniCourse("ENG101", uniStartX, uniStartY);
-    generateUniCourse("COM201", uniStartX + 360, uniStartY);
-    generateUniCourse("PSY101", uniStartX + 180, uniStartY);
 
-    generateUniCourse("ARAB101", uniStartX, uniStartY + 70);
-    generateUniCourse("ARAB103", uniStartX + 180, uniStartY + 70);
-    generateUniCourse("ARAB203", uniStartX + 360, uniStartY + 70);
-
-    generateUniCourse("ISC101", uniStartX, uniStartY + 140);
-    generateUniCourse("ISC103", uniStartX + 180, uniStartY + 140);
-    generateUniCourse("ISC105", uniStartX + 360, uniStartY + 140);
-
-    generateUniCourse("ISC203", uniStartX + 180, uniStartY + 210);
-   
-}
 
 function generateCourse(course, containerId) {
 
     const container = document.getElementById(containerId);
 
     updateCoordinates(startX, startY);
+
+    const nodeGroup = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "g"
+    );
+
+    nodeGroup.setAttribute("class", "course-node-group");
+    nodeGroup.setAttribute("id", course + "Group");
 
     const text = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -81,6 +84,7 @@ function generateCourse(course, containerId) {
         "rect"
     );
 
+    rect.setAttribute("class", "course-node");
     rect.setAttribute("id", course);
     rect.setAttribute("width", 130);
     rect.setAttribute("height", 50);
@@ -97,9 +101,11 @@ function generateCourse(course, containerId) {
 
     text.textContent = course;
 
-    container.appendChild(rect);
-    container.appendChild(text);
-    generatedCourses.add(course);
+    nodeGroup.appendChild(rect);
+    nodeGroup.appendChild(text);
+    container.appendChild(nodeGroup);
+
+    generatedCourses.push(course);
 }
  
 
@@ -109,6 +115,14 @@ function generateSmallCourse(course, containerId) {
 
     updateSmallCoordinates(startX, startY);
 
+    const nodeGroup = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "g"
+    );
+
+    nodeGroup.setAttribute("class", "course-node-group");
+    nodeGroup.setAttribute("id", course + "Group");
+
     const text = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
@@ -119,6 +133,7 @@ function generateSmallCourse(course, containerId) {
         "rect"
     );
 
+    rect.setAttribute("class", "course-node");
     rect.setAttribute("id", course);
     rect.setAttribute("width", 130);
     rect.setAttribute("height", 50);
@@ -135,7 +150,9 @@ function generateSmallCourse(course, containerId) {
 
     text.textContent = course;
 
-    container.appendChild(rect);
-    container.appendChild(text);
-    generatedCourses.add(course);
+    nodeGroup.appendChild(rect);
+    nodeGroup.appendChild(text);
+    container.appendChild(nodeGroup);
+
+    generatedCourses.push(course);
 }

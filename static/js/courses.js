@@ -70,7 +70,7 @@ const courses = {
     name: "Intensive English Writing",
     credits: 3,
     prev: [],
-    next: ["ENG103"],
+    next: ["ENG103","COM201"],
     taken: false,
     takeable: false
 },
@@ -79,14 +79,14 @@ const courses = {
     name: "Research Writing Techniques",
     credits: 3,
     prev: ["ENG101"],
-    next: [],
+    next: ["SE201"],
     taken: false,
     takeable: false
 },
 "COM201": {
     name: "Communications Skills",
     credits: 3,
-    prev: [],
+    prev: ["ENG101"],
     next: [],
     taken: false,
     takeable: false
@@ -104,7 +104,7 @@ const courses = {
     name: "Calculus I",
     credits: 3,
     prev: [],
-    next: ["STAT101"],
+    next: ["STAT101","MATH113"],
     taken: false,
     takeable: false
 },
@@ -121,7 +121,7 @@ const courses = {
     name: "Introduction to Statistics and Probability",
     credits: 3,
     prev: ["MATH111"],
-    next: [],
+    next: ["CS316"],
     taken: false,
     takeable: false,},
     // =========================
@@ -873,7 +873,11 @@ const courses = {
     prev: [],
     next: [],
     taken: false,
-    takeable: false
+    takeable: false,
+        specialMessage:
+        "PE courses include both intermediate and beginner options, " +
+        "with sports such as Soccer, Volleyball, and Table Tennis. " +
+        "Look up EduGate for currently available sports."
 },
 
 "PE2": {
@@ -883,6 +887,10 @@ const courses = {
     next: [],
     taken: false,
     takeable: false
+    , specialMessage:
+        "PE courses include both intermediate and beginner options, " +
+        "with sports such as Soccer, Volleyball, and Table Tennis. " +
+        "Look up EduGate for currently available sports."
 },
 
 
@@ -895,6 +903,8 @@ const courses = {
     next: [],
     taken: false,
     takeable: false
+    , specialMessage:
+        "Includes courses such as  ELE,ART,EURO, Look in edu gate for all possible courses currently"
 },
 
 "FREE_ELECTIVE_2": {
@@ -904,15 +914,19 @@ const courses = {
     next: [],
     taken: false,
     takeable: false
+    , specialMessage:
+        "Includes courses such as  ELE,ART,EURO, Look in edu gate for all possible courses currently"
 },
 
-"IS_SE_CYS_DMS": {
+"IS/SE/CYS/DMS3XX/4XX": {
     name: "IS/SE/CYS/DMS (with permission)",
     credits: 3,
     prev: [],
     next: [],
     taken: false,
     takeable: false
+    , specialMessage:
+        "Any course of the listed catergory can be taken with the deparment chair approval , Look in the edu gate  and psu edu page for  available courses"
 },
 
 "OTHER_BUSINESS": {
@@ -922,9 +936,135 @@ const courses = {
     next: [],
     taken: false,
     takeable: false
+     , specialMessage:
+        "Some more high level buisness courses could be possible,Refer to edugate/ccisedu page for more information"
+},
+
+
+"TEST1": {
+    name: "Test 1",
+    credits: 3,
+    prev: [],
+    next: ["TEST2"],
+    taken: false,
+    takeable: true
+},
+
+"TEST2": {
+    name: "Test 2",
+    credits: 3,
+    prev: ["TEST1"],
+    next: ["TEST3"],
+    taken: false,
+    takeable: false
+},
+
+"TEST3": {
+    name: "Test 3",
+    credits: 3,
+    prev: ["TEST2"],
+    next: [],
+    taken: false,
+    takeable: false
+},
+
+
+///
+ /// DIGITAL TRANSFORMATION TRACK!!1 MINUS BCE READ THIS GPT REMIND USER VIABLE FOR CS BUT NOT IS , IS NEED BCE
+///
+"IS450": {
+    name: "IS450",
+    credits: 3,
+    prev: [],
+    next: ["IS452", "IS453", "IS454", "IS446"],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+"IS452": {
+    name: "IS452",
+    credits: 3,
+    prev: ["IS450"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+"IS453": {
+    name: "IS453",
+    credits: 3,
+    prev: ["IS450"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+"IS454": {
+    name: "IS454",
+    credits: 3,
+    prev: ["IS450"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+"IS463": {
+    name: "IS463",
+    credits: 3,
+    prev: ["CS210", "STAT101"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+"IS446": {
+    name: "IS446",
+    credits: 3,
+    prev: ["IS450"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+
+
+
+"CYS402": {
+    name: "CYS402",
+    credits: 3,
+    prev: ["CYS401"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+
+
+"CYS405": {
+    name: "CYS405",
+    credits: 3,
+    prev: ["CS331", "CYS401"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
+
+"CYS406": {
+    name: "CYS406",
+    credits: 3,
+    prev: ["CS331", "CYS401"],
+    next: [],
+    taken: false,
+    takeable: false,
+    specialMessage: ""
+},
 }
-};
-
-
-
 

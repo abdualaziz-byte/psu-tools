@@ -1,46 +1,45 @@
 {% extends "base.html" %}
 
 {% block title %}
-progress map
+Progress Map
 {% endblock %}
-
 
 {% block content %}
 
 <h1>Welcome to the Progress Map!</h1>
- <svg width="1200" height="900" id="map" style="border: 2px solid black;">
+
+<svg width="1200" height="900" id="map" style="border: 2px solid black;">
+
+    <defs>
+        <marker
+            id="arrowhead"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+            markerUnits="strokeWidth">
+
+            <path
+                d="M 0 0 L 8 4 L 0 8 Z"
+                fill="context-stroke"
+            />
+
+        </marker>
+    </defs>
 
     <g id="mapContent">
 
         <g id="universityCourses">
-
-            <text id="universityCoursesTitle" x="0" y="1000">
-                University Required Courses
-            </text>
-
-            <!-- university courses go here -->
-
+            <text id="universityCoursesTitle"></text>
         </g>
-
 
         <g id="collegeCourses">
-
-            <text id="collegeCoursesTitle" x="900" y="570">
-            
-            </text>
-
-            <!-- college courses go here -->
-
+            <text id="collegeCoursesTitle"></text>
         </g>
 
-
         <g id="programCourses">
-
-            <text id="programCoursesTitle" x="510" y="70">
-            </text>
-
-            <!-- program courses go here -->
-
+            <text id="programCoursesTitle"></text>
         </g>
 
     </g>
@@ -50,15 +49,24 @@ progress map
 {% endblock %}
 
 {% block scripts %}
+
+<script type="module">
+    import { AvoidLib } from "/static/libavoid/index.js";
+
+    await AvoidLib.load();
+
+    window.AvoidLib = AvoidLib.getInstance();
+</script>
+
 <script src="/static/js/mapjs/Imapcontrol.js"></script>
 <script src="/static/js/courses.js"></script>
 <script src="/static/js/generators.js"></script>
 <script src="/static/js/mapjs/functions.js"></script>
-
 <script src="/static/js/mapjs/Colleges.js"></script>
 <script src="/static/js/mapjs/CS.js"></script>
-
 <script src="/static/js/eventlisten.js"></script>
+<script src="/static/js/mapjs/interaction.js"></script>
 
+<script type="module" src="/static/js/mapinit.js"></script>
 
 {% endblock %}

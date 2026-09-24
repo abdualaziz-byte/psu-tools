@@ -25,3 +25,29 @@ function generateCSCollegeCourses(id, x, y) {
 function linkCourses(course1, course2) {
 
 }
+
+
+
+function generateUniCourses(id, x, y) {
+
+    generateContainer(id, x, y);
+
+    generateCourse("ENG101", id);
+    generateCourse("COM201", id);
+    generateCourse("PSY101", id);
+
+    generateCourse("ARAB101", id);
+    generateCourse("ARAB103", id);
+    generateCourse("ARAB203", id);
+
+    generateCourse("ISC101", id);
+    generateCourse("ISC103", id);
+    generateCourse("ISC105", id);
+
+    generateCourse("ISC203", id);
+
+    makeTitle(id, "University Requirements");
+
+    courseCounter = 0;
+    gen = 0;
+}

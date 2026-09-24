@@ -1,238 +1,946 @@
 let courseCode;
 
+let holdTimer = null;
+let holdAnimation = null;
+let holdCourseCode = null;
+let holdCircle = null;
 
-for (const courseCode of generatedCourses) {
+let ignoreNextClick = null;
 
-    const course = courses[courseCode];
+const HOLD_TIME = 700;
+const OVERLAY_DELAY = 250;
 
-    for (const nextCode of course.next) {
+// --------------------------------------------------
+// HOLD COLORS
+// --------------------------------------------------
 
-        if (generatedCourses.has(nextCode)) {
+const holdColors = [
+{
+position: 0,
+color: [239, 68, 68]
+},
 
-            const prevRect = document.getElementById(courseCode);
-            const courseRect = document.getElementById(nextCode);
+{
+    position: 0.35,
+    color: [245, 120, 45]
+},
 
-            const prevX = parseFloat(prevRect.getAttribute("x"));
-            const prevY = parseFloat(prevRect.getAttribute("y"));
-            const prevWidth = parseFloat(prevRect.getAttribute("width"));
-            const prevHeight = parseFloat(prevRect.getAttribute("height"));
+{
+    position: 0.68,
+    color: [235, 190, 45]
+},
 
-            const courseX = parseFloat(courseRect.getAttribute("x"));
-            const courseY = parseFloat(courseRect.getAttribute("y"));
-            const courseWidth = parseFloat(courseRect.getAttribute("width"));
-            const courseHeight = parseFloat(courseRect.getAttribute("height"));
+{
+    position: 1,
+    color: [34, 197, 94]
+}
 
-            const x1 = prevX + prevWidth / 2;
-            const y1 = prevY;
+];
 
-            const x2 = courseX + courseWidth / 2;
-            const y2 = courseY + courseHeight;
+function interpolateColor(color1, color2, amount) {
 
-            // create arrow
+const r =
+    Math.round(
+        color1[0] +
+        (color2[0] - color1[0]) * amount
+    );
 
-             const arrow = document.createElementNS(
-                    "http://www.w3.org/2000/svg",
-                    "line"
-                );
+const g =
+    Math.round(
+        color1[1] +
+        (color2[1] - color1[1]) * amount
+    );
 
-                arrow.setAttribute("x1", x1);
-                arrow.setAttribute("y1", y1);
-                arrow.setAttribute("x2", x2);
-                arrow.setAttribute("y2", y2);
+const b =
+    Math.round(
+        color1[2] +
+        (color2[2] - color1[2]) * amount
+    );
 
-                arrow.setAttribute("stroke", "black");
-                arrow.setAttribute("stroke-width", "2");
+return `rgb(${r}, ${g}, ${b})`;
 
-                mapContent.appendChild(arrow);
-        }
+}
+
+function getHoldColor(progress) {
+
+for (let i = 0; i < holdColors.length - 1; i++) {
+
+    const current = holdColors[i];
+    const next = holdColors[i + 1];
+
+    if (
+        progress >= current.position &&
+        progress <= next.position
+    ) {
+
+        const localProgress =
+            (progress - current.position) /
+            (next.position - current.position);
+
+        return interpolateColor(
+            current.color,
+            next.color,
+            localProgress
+        );
     }
 }
-mapContent.addEventListener("click", function(event) {
 
-     courseCode = event.target.id;
+return "rgb(34, 197, 94)";
 
-    if (courseCode === "") {
-        courseCode = event.target.textContent;
+}
+
+// --------------------------------------------------
+// GET COURSE CODE
+// --------------------------------------------------
+
+function getCourseCodeFromEvent(event) {
+
+let code = event.target.id;
+
+if (code === "") {
+    code = event.target.textContent;
+}
+
+return code;
+
+}
+
+// --------------------------------------------------
+// HOVER OVERLAY
+// --------------------------------------------------
+
+function hideHoverOverlay() {
+
+const overlays =
+    document.querySelectorAll(".course-info");
+
+for (const overlay of overlays) {
+
+    overlay.classList.add(
+        "hold-hidden"
+    );
+}
+
+}
+
+function restoreHoverOverlay() {
+
+const overlays =
+    document.querySelectorAll(".course-info");
+
+for (const overlay of overlays) {
+
+    overlay.classList.remove(
+        "hold-hidden"
+    );
+}
+
+}
+
+// --------------------------------------------------
+// CREATE HOLD CIRCLE
+// --------------------------------------------------
+
+function createHoldCircle(rect) {
+
+const x =
+    parseFloat(
+        rect.getAttribute("x")
+    );
+
+const y =
+    parseFloat(
+        rect.getAttribute("y")
+    );
+
+const width =
+    parseFloat(
+        rect.getAttribute("width")
+    );
+
+const height =
+    parseFloat(
+        rect.getAttribute("height")
+    );
+
+
+const centerX =
+    x + width / 2;
+
+const centerY =
+    y + height / 2;
+
+
+const radius =
+    Math.min(width, height) / 2 + 7;
+
+
+const circumference =
+    2 * Math.PI * radius;
+
+
+holdCircle =
+    document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+    );
+
+
+holdCircle.setAttribute(
+    "cx",
+    centerX
+);
+
+holdCircle.setAttribute(
+    "cy",
+    centerY
+);
+
+holdCircle.setAttribute(
+    "r",
+    radius
+);
+
+holdCircle.setAttribute(
+    "class",
+    "hold-unlock-circle"
+);
+
+
+holdCircle.style.strokeDasharray =
+    circumference;
+
+holdCircle.style.strokeDashoffset =
+    circumference;
+
+
+holdCircle.style.setProperty(
+    "--circle-length",
+    circumference
+);
+
+
+mapContent.appendChild(
+    holdCircle
+);
+
+}
+
+// --------------------------------------------------
+// START HOLD
+// --------------------------------------------------
+
+function startHold(event) {
+
+const code =
+    getCourseCodeFromEvent(event);
+
+const course =
+    courses[code];
+
+
+if (!course) {
+    return;
+}
+
+
+// Only locked courses can be held
+if (
+    course.taken ||
+    course.takeable
+) {
+    return;
+}
+
+
+const rect =
+    document.getElementById(code);
+
+
+if (rect === null) {
+    return;
+}
+
+
+holdCourseCode = code;
+
+
+// Hide information overlay
+hideHoverOverlay();
+
+
+// Create circular progress
+createHoldCircle(rect);
+
+
+const startTime =
+    performance.now();
+
+
+// ----------------------------------------------
+// COLOR ANIMATION
+// ----------------------------------------------
+
+function animateHold(currentTime) {
+
+    if (
+        holdCourseCode !== code
+    ) {
+        return;
     }
 
-    const course = courses[courseCode];
+
+    const elapsed =
+        currentTime - startTime;
 
 
-    // Case 1: Course is taken
+    const progress =
+        Math.min(
+            elapsed / HOLD_TIME,
+            1
+        );
+
+
+    // Change course color
+    rect.setAttribute(
+        "fill",
+        getHoldColor(progress)
+    );
+
+
+    // Update circle progress
+    if (holdCircle !== null) {
+
+        const circumference =
+            parseFloat(
+                holdCircle.style
+                    .getPropertyValue(
+                        "--circle-length"
+                    )
+            );
+
+
+        holdCircle.style.strokeDashoffset =
+            circumference *
+            (1 - progress);
+    }
+
+
+    if (progress < 1) {
+
+        holdAnimation =
+            requestAnimationFrame(
+                animateHold
+            );
+    }
+}
+
+
+holdAnimation =
+    requestAnimationFrame(
+        animateHold
+    );
+
+
+// ----------------------------------------------
+// COMPLETE HOLD
+// ----------------------------------------------
+
+holdTimer =
+    setTimeout(function() {
+
+        if (
+            holdCourseCode !== code
+        ) {
+            return;
+        }
+
+
+        const course =
+            courses[code];
+
+
+        if (!course) {
+
+            clearHold();
+
+            return;
+        }
+
+
+        // Make sure the course ends green
+        rect.setAttribute(
+            "fill",
+            "rgb(34, 197, 94)"
+        );
+
+
+        // Small completion animation
+        if (holdCircle !== null) {
+
+            holdCircle.classList.add(
+                "hold-complete"
+            );
+        }
+
+
+        // Recursively unlock prerequisites
+        unlockBackwards(course);
+
+
+        // Only the course the user
+        // actually held enters FIFO
+        turnOnCourse(course);
+
+
+        // Prevent the click generated
+        // by pointerup
+        ignoreNextClick = code;
+
+
+        // Finish the hold state
+        finishHold();
+
+
+    }, HOLD_TIME);
+
+}
+
+// --------------------------------------------------
+// FINISH SUCCESSFUL HOLD
+// --------------------------------------------------
+
+function finishHold() {
+
+if (holdTimer !== null) {
+
+    clearTimeout(
+        holdTimer
+    );
+
+    holdTimer = null;
+}
+
+
+if (holdAnimation !== null) {
+
+    cancelAnimationFrame(
+        holdAnimation
+    );
+
+    holdAnimation = null;
+}
+
+
+const completedCircle =
+    holdCircle;
+
+
+holdCircle = null;
+
+
+if (completedCircle !== null) {
+
+    setTimeout(function() {
+
+        completedCircle.remove();
+
+    }, 180);
+}
+
+
+holdCourseCode = null;
+
+
+// Let the completion animation
+// breathe before showing overlay.
+setTimeout(function() {
+
+    restoreHoverOverlay();
+
+}, OVERLAY_DELAY);
+
+}
+
+// --------------------------------------------------
+// CANCEL HOLD
+// --------------------------------------------------
+
+function clearHold() {
+
+if (holdTimer !== null) {
+
+    clearTimeout(
+        holdTimer
+    );
+
+    holdTimer = null;
+}
+
+
+if (holdAnimation !== null) {
+
+    cancelAnimationFrame(
+        holdAnimation
+    );
+
+    holdAnimation = null;
+}
+
+
+if (holdCourseCode !== null) {
+
+    const rect =
+        document.getElementById(
+            holdCourseCode
+        );
+
+    const course =
+        courses[holdCourseCode];
+
+
+    // If the user released early,
+    // return the course to locked.
+    if (
+        rect !== null &&
+        course !== undefined &&
+        !course.taken &&
+        !course.takeable
+    ) {
+
+        rect.setAttribute(
+            "fill",
+            "red"
+        );
+    }
+}
+
+
+if (holdCircle !== null) {
+
+    holdCircle.remove();
+
+    holdCircle = null;
+}
+
+
+holdCourseCode = null;
+
+
+restoreHoverOverlay();
+
+}
+
+// --------------------------------------------------
+// POINTER EVENTS
+// --------------------------------------------------
+
+mapContent.addEventListener(
+"pointerdown",
+function(event) {
+
+    startHold(event);
+
+}
+
+);
+
+mapContent.addEventListener(
+"pointerup",
+function(event) {
+
+    if (
+        holdCourseCode === null
+    ) {
+        return;
+    }
+
+
+    clearHold();
+
+}
+
+);
+
+mapContent.addEventListener(
+"pointercancel",
+function(event) {
+
+    clearHold();
+
+}
+
+);
+
+// --------------------------------------------------
+// NORMAL CLICK
+// --------------------------------------------------
+
+mapContent.addEventListener(
+"click",
+function(event) {
+
+    courseCode =
+        getCourseCodeFromEvent(
+            event
+        );
+
+
+    if (courseCode === "") {
+        return;
+    }
+
+
+    const course =
+        courses[courseCode];
+
+
+    if (!course) {
+        return;
+    }
+
+
+    // Completed hold already handled
+    // this click.
+    if (
+        ignoreNextClick === courseCode
+    ) {
+
+        ignoreNextClick = null;
+
+        return;
+    }
+
+
+    // ------------------------------------------
+    // CASE 1: TAKEN
+    // ------------------------------------------
+
     if (course.taken) {
 
         turnOffCourse(course);
 
-        // The course the user actually clicked becomes takeable
-        course.takeable = true;
-                        updateCourseColor(course);
 
+        // The course clicked becomes takeable
+        course.takeable = true;
+
+
+        updateCourseColor(
+            course
+        );
     }
 
 
-    // Case 2: Course is takeable
+    // ------------------------------------------
+    // CASE 2: TAKEABLE
+    // ------------------------------------------
+
     else if (course.takeable) {
 
         turnOnCourse(course);
     }
 
 
-    // Case 3: Course is locked
+    // ------------------------------------------
+    // CASE 3: LOCKED
+    // ------------------------------------------
+
     else {
 
-        unlockBackwards(course);
-
-        // Now propagate the changes forward
-        turnOnCourse(course);
-    }
-
-});
-
-for (const courseCode of generatedCourses) {
-
-    const course = courses[courseCode];
-    const rect = document.getElementById(courseCode);
-
-    if (course.prev.length === 0) {
-        rect.setAttribute("fill", "yellow");
-    } 
-    else {
-        rect.setAttribute("fill", "red");
-    }
-}
-
-  
-
-
-
-
-
-
-
-
-
-
-
- function turnOffCourse(course) {
-
-    
-
-    for (const nextCode of course.next) {
-
-        const nextCourse = courses[nextCode];
-
-        if (!nextCourse.taken) {
-            nextCourse.taken = false;
-            nextCourse.takeable = false;
-                        updateCourseColor(nextCourse);
-
-            continue;
-        }
-
-        turnOffCourse(nextCourse);
-    }
-
-    course.taken = false;
-    course.takeable = false;
-                updateCourseColor(course);
-
-}
-
-
-
-function turnOnCourse(course) {
-    course.taken = true;
-            updateCourseColor(course);
-
-    for (const nextCode of course.next) {
-
-        const nextCourse = courses[nextCode];
-
-        let canTake = true;
-
-        for (const prevCode of nextCourse.prev) {
-
-            if (!courses[prevCode].taken) {
-                canTake = false;
-                
-                break;
-            }
-        }
-
-        if (canTake) {
-                console.log("NEXT:", nextCode, "CAN TAKE:", canTake, "TAKEABLE:", nextCourse.takeable);
-            nextCourse.takeable = true;
-            updateCourseColor(nextCourse);
-        }
-    }
-}
-
-
-
-function unlockBackwards(course) {
-
-    // Base case: already taken
-    if (course.taken) {
+        // Locked courses require holding.
         return;
     }
 
-   
+}
 
-    // Work backwards through prerequisites
-    for (const prevCode of course.prev) {
+);
 
-        const prevCourse = courses[prevCode];
+// --------------------------------------------------
+// INITIAL COURSE COLORS
+// --------------------------------------------------
 
-        if (!prevCourse.taken) {
-            unlockBackwards(prevCourse);
-        }
-    }
+for (
+const courseCode of generatedCourses
+) {
 
-    // Once we've handled the prerequisites,
-    // turn this course on
-    course.taken = true;
+const course =
+    courses[courseCode];
+
+
+if (!course) {
+
+    console.log(
+        "UNDEFINED:",
+        courseCode
+    );
+
+    continue;
+}
+
+
+const rect =
+    document.getElementById(
+        courseCode
+    );
+
+
+if (rect === null) {
+    continue;
+}
+
+
+if (
+    course.prev.length === 0
+) {
+
+    rect.setAttribute(
+        "fill",
+        "yellow"
+    );
+
     course.takeable = true;
-                updateCourseColor(course);
+
+}
+else {
+
+    rect.setAttribute(
+        "fill",
+        "red"
+    );
+}
 
 }
 
-for (const courseCode of generatedCourses) {
+// --------------------------------------------------
+// TURN OFF COURSE
+// --------------------------------------------------
 
-    const course = courses[courseCode];
+function turnOffCourse(course) {
 
-    if (!course) {
-        console.log("UNDEFINED:", courseCode);
+for (
+    const nextCode of course.next
+) {
+
+    const nextCourse =
+        courses[nextCode];
+
+
+    if (!nextCourse.taken) {
+
+        nextCourse.taken = false;
+        nextCourse.takeable = false;
+
+        updateCourseColor(
+            nextCourse
+        );
+
         continue;
     }
 
-    const rect = document.getElementById(courseCode);
 
-    if (course.prev.length === 0) {
-        rect.setAttribute("fill", "yellow");
-    } else {
-        rect.setAttribute("fill", "red");
-    }
+    turnOffCourse(
+        nextCourse
+    );
 }
 
 
+course.taken = false;
+course.takeable = false;
 
-function updateCourseColor(course) {
 
-       const courseCode = Object.keys(courses).find(
+updateCourseColor(
+    course
+);
+
+
+const courseCode =
+    Object.keys(courses).find(
         key => courses[key] === course
     );
 
-    const rect = document.getElementById(courseCode);
-    console.log("COURSE:", courseCode);
-    console.log("RECT:", rect);
-    if (course.taken) {
-        rect.setAttribute("fill", "green");
+
+window.removeFromFifo(
+    courseCode
+);
+
+window.restorePreviousBranch(
+    course
+);
+
+}
+
+// --------------------------------------------------
+// TURN ON COURSE
+// --------------------------------------------------
+
+function turnOnCourse(course) {
+
+course.taken = true;
+
+
+updateCourseColor(
+    course
+);
+
+
+const courseCode =
+    Object.keys(courses).find(
+        key => courses[key] === course
+    );
+
+
+window.addToFifo(
+    courseCode
+);
+
+window.fadePreviousBranch(
+    course
+);
+
+
+for (
+    const nextCode of course.next
+) {
+
+    const nextCourse =
+        courses[nextCode];
+
+
+    let canTake = true;
+
+
+    for (
+        const prevCode of nextCourse.prev
+    ) {
+
+        if (
+            !courses[prevCode].taken
+        ) {
+
+            canTake = false;
+
+            break;
+        }
     }
-    else if (course.takeable) {
-        rect.setAttribute("fill", "yellow");
-    }
-    else {
-        rect.setAttribute("fill", "red");
+
+
+    if (canTake) {
+
+        console.log(
+            "NEXT:",
+            nextCode,
+            "CAN TAKE:",
+            canTake,
+            "TAKEABLE:",
+            nextCourse.takeable
+        );
+
+
+        nextCourse.takeable = true;
+
+
+        updateCourseColor(
+            nextCourse
+        );
     }
 }
 
+}
+
+// --------------------------------------------------
+// UNLOCK BACKWARDS
+// --------------------------------------------------
+
+function unlockBackwards(course) {
+
+if (course.taken) {
+    return;
+}
+
+
+for (
+    const prevCode of course.prev
+) {
+
+    const prevCourse =
+        courses[prevCode];
+
+
+    if (!prevCourse.taken) {
+
+        unlockBackwards(
+            prevCourse
+        );
+    }
+}
+
+
+course.taken = true;
+course.takeable = true;
+
+
+updateCourseColor(
+    course
+);
+
+}
+
+// --------------------------------------------------
+// UPDATE COURSE COLOR
+// --------------------------------------------------
+
+function updateCourseColor(course) {
+
+const courseCode =
+    Object.keys(courses).find(
+        key => courses[key] === course
+    );
+
+
+const rect =
+    document.getElementById(
+        courseCode
+    );
+
+
+if (rect === null) {
+    return;
+}
+
+
+console.log(
+    "COURSE:",
+    courseCode
+);
+
+console.log(
+    "RECT:",
+    rect
+);
+
+
+if (course.taken) {
+
+    rect.setAttribute(
+        "fill",
+        "green"
+    );
+
+}
+else if (course.takeable) {
+
+    rect.setAttribute(
+        "fill",
+        "yellow"
+    );
+
+}
+else {
+
+    rect.setAttribute(
+        "fill",
+        "red"
+    );
+}
+
+}

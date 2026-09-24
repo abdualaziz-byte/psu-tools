@@ -15,7 +15,15 @@ let gen = 0;
 
 
 
+let totalCredits = 0;
 
+function addCourseCredits(course) {
+    totalCredits += course.credits;
+}
+
+function removeCourseCredits(course) {
+    totalCredits -= course.credits;
+}
 
 
 
@@ -56,38 +64,39 @@ function generateContainer(id, x, y) {
 
 function updateCoordinates(startX, startY) {
 
-    let row;
-    let z;
+   let row;
+let z;
 
-    courseCounter++;
+courseCounter++;
 
-    if (courseCounter > 11) {
-        courseCounter = 1;
-        gen++;
-    }
+if (courseCounter > 11) {
+    courseCounter = 1;
+    gen++;
+}
 
-    if (courseCounter <= 4) {
-        row = 0;
-        z = courseCounter - 1;
-    }
-    else if (courseCounter <= 8) {
-        row = 1;
-        z = courseCounter - 5;
-    }
-    else {
-        row = 2;
-        z = courseCounter - 9;
-    }
+if (courseCounter <= 4) {
+    row = 0;
+    z = courseCounter - 1;
+}
+else if (courseCounter <= 8) {
+    row = 1;
+    z = courseCounter - 5;
+}
+else {
+    row = 2;
+    z = courseCounter - 9;
+}
 
-    y = startY - (row * 80) - (gen * 240);
-x = startX + (z * 170);
-    if (row === 1) {
-        if (z === 0) x -= 42.5;
-        if (z === 3) x += 42.5;
-    }
-    else if (row === 2) {
-        x = startX + 85 + (z * 170);
-    }
+y = startY - (row * 130) - (gen * 390);
+x = startX + (z * 240);
+
+if (row === 1) {
+    if (z === 0) x -= 60;
+    if (z === 3) x += 60;
+}
+else if (row === 2) {
+    x = startX + 120 + (z * 240);
+}
 }
 
 function makeTitle(id, titleText) {
@@ -134,3 +143,5 @@ function updateSmallCoordinates(startX, startY) {
     y = startY - (smallGen * 80);
     x = startX + (row * 170);
 }
+
+
