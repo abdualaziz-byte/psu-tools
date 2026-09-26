@@ -1,7 +1,10 @@
+let Cscollgecredits = 34
+let UniCredits = 23
+
+
 function generateCSCollegeCourses(id, x, y) {
 
-    
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, Cscollgecredits);
 
     generateCourse("CS101", id);
     generateCourse("CS175", id);
@@ -15,22 +18,29 @@ function generateCSCollegeCourses(id, x, y) {
     generateCourse("CS331", id);
     generateCourse("ETHC303", id);
 
-    makeTitle(id, "College Required Courses");
+    makeTitle(
+        id,
+        "0/" + Cscollgecredits + " CREDITS COMPLETED"
+    );
+
+    makeSectionTitle(
+        id,
+        "🏫 College Required Courses"
+    );
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title map-title-college"
+    );
 
     courseCounter = 0;
     gen = 0;
 }
 
-//linking courses 
-function linkCourses(course1, course2) {
-
-}
-
-
 
 function generateUniCourses(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, UniCredits);
 
     generateCourse("ENG101", id);
     generateCourse("COM201", id);
@@ -46,7 +56,20 @@ function generateUniCourses(id, x, y) {
 
     generateCourse("ISC203", id);
 
-    makeTitle(id, "University Requirements");
+    makeTitle(
+        id,
+        "0/" + UniCredits + " CREDITS COMPLETED"
+    );
+
+    makeSectionTitle(
+        id,
+        "🎓 University Requirements"
+    );
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title map-title-university"
+    );
 
     courseCounter = 0;
     gen = 0;

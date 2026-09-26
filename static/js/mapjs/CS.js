@@ -1,8 +1,23 @@
+// =========================
+// TRACK COUNTERS
+// =========================
+let cscoreCount = 41
+let CsElectiveCount = 15
+let BuisnessElectiveCount = 3
+let PeCount = 2
+let FreeElectiveCount = 6;
+
+let aiElectiveCount = 6;
+let aiCoreCount = 6;
+let dxCoreCount = 6;
+let dxElectiveCount = 6;
+let cysCount = 12;
 
 
 // =========================
 // GENERATE CS MAP
 // =========================
+let maxcredits = 134
 
 generateUniCourses("University Courses", 1300, 1700);
 
@@ -31,20 +46,7 @@ generateAIDataScienceCore("AI & DS Core", -300, -50);
 
 generateAIDataScienceElectives("AI & DS Electives", -300, 300);
 
-
-// =========================
-// TRACK COUNTERS
-// =========================
-
-let aiCoreCount = 0;
-
-let aiElectiveCount = 0;
-
-let dxCoreCount = 0;
-
-let dxElectiveCount = 0;
-
-let cysCount = 0;
+makeText("Credithours", 370, -400, "0/" + maxcredits + " CREDITS COMPLETED");
 
 
 // =========================
@@ -53,7 +55,7 @@ let cysCount = 0;
 
 function generateCsCourses(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, cscoreCount);
 
     generateCourse("PHY105", id);
     generateCourse("PHY205", id);
@@ -71,7 +73,14 @@ function generateCsCourses(id, x, y) {
     generateCourse("CS499", id);
     generateCourse("CS492-coop-", id);
 
-    makeTitle(id, "Program Required Courses");
+    makeTitle(id, "0/" + cscoreCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-core"
+    );
+
+    makeSectionTitle(id, "🧠 Program Required Courses");
 
     courseCounter = 0;
     gen = 0;
@@ -84,7 +93,7 @@ function generateCsCourses(id, x, y) {
 
 function generateCsElectives(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, CsElectiveCount);
 
     generateCourse("CS381", id);
     generateCourse("CS387", id);
@@ -97,7 +106,14 @@ function generateCsElectives(id, x, y) {
     generateCourse("CS495", id);
     generateCourse("IS/SE/CYS/DMS3XX/4XX", id);
 
-    makeTitle(id, "CS Elective Courses");
+    makeTitle(id, "0/" + CsElectiveCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-elective"
+    );
+
+    makeSectionTitle(id, "💻 CS Elective Courses");
 
     courseCounter = 0;
     gen = 0;
@@ -110,7 +126,7 @@ function generateCsElectives(id, x, y) {
 
 function generateBusinessElective(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, BuisnessElectiveCount);
 
     generateSmallCourse("ACC111", id);
     generateSmallCourse("BUS101", id);
@@ -118,7 +134,14 @@ function generateBusinessElective(id, x, y) {
     generateSmallCourse("ECON102", id);
     generateSmallCourse("OTHER_BUSINESS", id);
 
-    makeTitle(id, "Business Elective");
+    makeTitle(id, "0/" + BuisnessElectiveCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-business"
+    );
+
+    makeSectionTitle(id, "💼 Business Elective");
 
     smallCounter = 0;
     smallGen = 0;
@@ -131,12 +154,19 @@ function generateBusinessElective(id, x, y) {
 
 function generatePE(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, PeCount);
 
     generateSmallCourse("PE1", id);
     generateSmallCourse("PE2", id);
 
-    makeTitle(id, "Physical Education");
+    makeTitle(id, "0/" + PeCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-pe"
+    );
+
+    makeSectionTitle(id, "🏃 Physical Education");
 
     smallCounter = 0;
     smallGen = 0;
@@ -149,12 +179,19 @@ function generatePE(id, x, y) {
 
 function generateFreeElective(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, FreeElectiveCount);
 
     generateSmallCourse("FREE_ELECTIVE_1", id);
     generateSmallCourse("FREE_ELECTIVE_2", id);
 
-    makeTitle(id, "Free Electives");
+    makeTitle(id, "0/" + FreeElectiveCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-free"
+    );
+
+    makeSectionTitle(id, "🎓 Free Electives");
 
     smallCounter = 0;
     smallGen = 0;
@@ -167,12 +204,19 @@ function generateFreeElective(id, x, y) {
 
 function generateDXCore(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, dxCoreCount);
 
     generateSmallCourse("IS450", id);
     generateSmallCourse("IS452", id);
 
-    makeTitle(id, "Digital Transformation Track Core");
+    makeTitle(id, "0/" + dxCoreCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-dx"
+    );
+
+    makeSectionTitle(id, "☁️ Digital Transformation Track Core");
 
     smallCounter = 0;
     smallGen = 0;
@@ -181,14 +225,21 @@ function generateDXCore(id, x, y) {
 
 function generateDXElectives(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, dxElectiveCount);
 
     generateSmallCourse("IS453", id);
     generateSmallCourse("IS454", id);
     generateSmallCourse("IS463", id);
     generateSmallCourse("IS446", id);
 
-    makeTitle(id, "Digital Transformation Track Electives");
+    makeTitle(id, "0/" + dxElectiveCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-dx"
+    );
+
+    makeSectionTitle(id, "☁️ Digital Transformation Track Electives");
 
     smallCounter = 0;
     smallGen = 0;
@@ -201,13 +252,20 @@ function generateDXElectives(id, x, y) {
 
 function generateCYSTrack(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, cysCount);
 
     generateSmallCourse("CYS402", id);
     generateSmallCourse("CYS405", id);
     generateSmallCourse("CYS406", id);
 
-    makeTitle(id, "Cyber Security Track");
+    makeTitle(id, "0/" + cysCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-cys"
+    );
+
+    makeSectionTitle(id, "🔒 Cyber Security Track");
 
     smallCounter = 0;
     smallGen = 0;
@@ -216,13 +274,13 @@ function generateCYSTrack(id, x, y) {
 
 function generateCYS403(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, 0);
 
     generateSmallCourse("CYS403", id);
 
     makeTitle(
         id,
-        "Cybersecurity Track/Digital Transformation Track Elective"
+        "🔒/☁️Cybersecurity Track/Digital Transformation Track Elective"
     );
 
     smallCounter = 0;
@@ -236,12 +294,19 @@ function generateCYS403(id, x, y) {
 
 function generateAIDataScienceCore(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, aiCoreCount);
 
     generateSmallCourse("CS316", id);
     generateSmallCourse("CS465", id);
 
-    makeTitle(id, "AI & Data Science Track Core");
+    makeTitle(id, "0/" + aiCoreCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-ai"
+    );
+
+    makeSectionTitle(id, "🤖 AI & Data Science Track Core");
 
     smallCounter = 0;
     smallGen = 0;
@@ -250,14 +315,21 @@ function generateAIDataScienceCore(id, x, y) {
 
 function generateAIDataScienceElectives(id, x, y) {
 
-    generateContainer(id, x, y);
+    generateContainer(id, x, y, aiElectiveCount);
 
     generateSmallCourse("CS469", id);
     generateSmallCourse("CS471", id);
     generateSmallCourse("CS481", id);
     generateSmallCourse("CS496", id);
 
-    makeTitle(id, "AI & Data Science Track Electives");
+    makeTitle(id, "0/" + aiElectiveCount + " CREDITS COMPLETED");
+
+    document.getElementById(id + "Title").setAttribute(
+        "class",
+        "map-title-ai"
+    );
+
+    makeSectionTitle(id, "🤖 AI & Data Science Track Electives");
 
     smallCounter = 0;
     smallGen = 0;

@@ -10,6 +10,28 @@ let ignoreNextClick = null;
 const HOLD_TIME = 700;
 const OVERLAY_DELAY = 250;
 
+///credit calcuation 
+
+
+
+
+let totalCredits = 0;
+
+function addCourseCredits(course) {
+    totalCredits += course.credits;
+
+    document.getElementById("Credithours").textContent =
+        totalCredits + "/" + maxcredits + " CREDITS COMPLETED" +
+        (totalCredits >= maxcredits ? " 🎉" : "");
+}
+
+function removeCourseCredits(course) {
+    totalCredits -= course.credits;
+
+    document.getElementById("Credithours").textContent =
+        totalCredits + "/" + maxcredits + " CREDITS COMPLETED";
+}
+
 // --------------------------------------------------
 // HOLD COLORS
 // --------------------------------------------------
@@ -32,9 +54,8 @@ color: [239, 68, 68]
 
 {
     position: 1,
-    color: [34, 197, 94]
+    color: [22, 140, 60]
 }
-
 ];
 
 function interpolateColor(color1, color2, amount) {
@@ -390,7 +411,6 @@ holdTimer =
 
         // Only the course the user
         // actually held enters FIFO
-        turnOnCourse(course);
 
 
         // Prevent the click generated
@@ -716,57 +736,76 @@ else {
 // --------------------------------------------------
 
 function turnOffCourse(course) {
+  for (
+        const nextCode of course.next
+    ) {
 
-for (
-    const nextCode of course.next
-) {
-
-    const nextCourse =
-        courses[nextCode];
+        const nextCourse =
+            courses[nextCode];
 
 
-    if (!nextCourse.taken) {
+        if (!nextCourse.taken) {
 
-        nextCourse.taken = false;
-        nextCourse.takeable = false;
+            nextCourse.taken = false;
+            nextCourse.takeable = false;
 
-        updateCourseColor(
+            updateCourseColor(
+                nextCourse
+            );
+
+            continue;
+        }
+
+
+        turnOffCourse(
             nextCourse
         );
-
-        continue;
     }
 
 
-    turnOffCourse(
-        nextCourse
+    const courseCode =
+        Object.keys(courses).find(
+            key => courses[key] === course
+        );
+
+
+    const courseGroup =
+        document.getElementById(
+            courseCode + "Group"
+        );
+
+
+    const container =
+        courseGroup.parentElement;
+
+
+    course.taken = false;
+
+    removeCourseCredits(course);
+
+    container.counter -= course.credits;
+
+    document.getElementById(
+        container.id + "Title"
+    ).textContent =
+        container.counter + "/" + container.max + " CREDITS COMPLETED";
+
+    course.takeable = false;
+
+
+    updateCourseColor(
+        course
     );
-}
 
 
-course.taken = false;
-course.takeable = false;
-
-
-updateCourseColor(
-    course
-);
-
-
-const courseCode =
-    Object.keys(courses).find(
-        key => courses[key] === course
+    window.removeFromFifo(
+        courseCode
     );
 
 
-window.removeFromFifo(
-    courseCode
-);
-
-window.restorePreviousBranch(
-    course
-);
-
+    window.restorePreviousBranch(
+        course
+    );
 }
 
 // --------------------------------------------------
@@ -775,75 +814,146 @@ window.restorePreviousBranch(
 
 function turnOnCourse(course) {
 
-course.taken = true;
+   
+    const courseCode =
+        Object.keys(courses).find(
+            key => courses[key] === course
+        );
 
+    const courseGroup =
+        document.getElementById(courseCode + "Group");
 
-updateCourseColor(
-    course
-);
+    const container =
+        courseGroup.parentElement;
 
+  if (container.counter >= container.max) {
 
-const courseCode =
-    Object.keys(courses).find(
-        key => courses[key] === course
+    const rect = document.getElementById(courseCode);
+
+    const x = parseFloat(rect.getAttribute("x"));
+    const y = parseFloat(rect.getAttribute("y"));
+    const width = parseFloat(rect.getAttribute("width"));
+
+    const messageGroup = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "g"
     );
 
+    messageGroup.setAttribute(
+        "class",
+        "course-limit-message"
+    );
 
-window.addToFifo(
-    courseCode
-);
+    const background = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "rect"
+    );
 
-window.fadePreviousBranch(
-    course
-);
+    const text = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+    );
 
+    const message = "Credit limit reached";
 
-for (
-    const nextCode of course.next
-) {
+    const messageWidth = 150;
+    const messageHeight = 28;
 
-    const nextCourse =
-        courses[nextCode];
+    background.setAttribute(
+        "x",
+        x + width / 2 - messageWidth / 2
+    );
 
+    background.setAttribute(
+        "y",
+        y - messageHeight - 8
+    );
 
-    let canTake = true;
+    background.setAttribute(
+        "width",
+        messageWidth
+    );
 
+    background.setAttribute(
+        "height",
+        messageHeight
+    );
 
-    for (
-        const prevCode of nextCourse.prev
-    ) {
+    background.setAttribute(
+        "class",
+        "course-limit-message-background"
+    );
 
-        if (
-            !courses[prevCode].taken
-        ) {
+    text.setAttribute(
+        "x",
+        x + width / 2
+    );
 
-            canTake = false;
+    text.setAttribute(
+        "y",
+        y - 19
+    );
 
-            break;
+    text.setAttribute(
+        "text-anchor",
+        "middle"
+    );
+
+    text.setAttribute(
+        "dominant-baseline",
+        "middle"
+    );
+
+    text.setAttribute(
+        "class",
+        "course-limit-message-text"
+    );
+
+    text.textContent = message;
+
+    messageGroup.appendChild(background);
+    messageGroup.appendChild(text);
+
+    mapContent.appendChild(messageGroup);
+
+    setTimeout(function() {
+        messageGroup.remove();
+    }, 2000);
+
+    return;}
+
+    container.counter += course.credits;
+
+document.getElementById(
+    container.id + "Title"
+).textContent =
+    container.counter + "/" + container.max + " CREDITS COMPLETED";
+
+course.taken = true;
+
+    addCourseCredits(course);
+
+    updateCourseColor(course);
+
+    window.addToFifo(courseCode);
+    window.fadePreviousBranch(course);
+
+    for (const nextCode of course.next) {
+        const nextCourse = courses[nextCode];
+        let canTake = true;
+
+        for (const prevCode of nextCourse.prev) {
+            if (!courses[prevCode].taken) {
+                canTake = false;
+                break;
+            }
+        }
+
+        if (canTake) {
+            nextCourse.takeable = true;
+            updateCourseColor(nextCourse);
         }
     }
-
-
-    if (canTake) {
-
-        console.log(
-            "NEXT:",
-            nextCode,
-            "CAN TAKE:",
-            canTake,
-            "TAKEABLE:",
-            nextCourse.takeable
-        );
-
-
-        nextCourse.takeable = true;
-
-
-        updateCourseColor(
-            nextCourse
-        );
-    }
-}
 
 }
 
@@ -851,38 +961,227 @@ for (
 // UNLOCK BACKWARDS
 // --------------------------------------------------
 
+
 function unlockBackwards(course) {
 
-if (course.taken) {
-    return;
-}
-
-
-for (
-    const prevCode of course.prev
-) {
-
-    const prevCourse =
-        courses[prevCode];
-
-
-    if (!prevCourse.taken) {
-
-        unlockBackwards(
-            prevCourse
-        );
+    if (course.taken) {
+        course.takeable = true;
+        updateCourseColor(course);
+        return true;
     }
-}
+
+    const courseCode =
+        Object.keys(courses).find(
+            key => courses[key] === course
+        );
+
+    const courseGroup =
+        document.getElementById(
+            courseCode + "Group"
+        );
+
+    const container =
+        courseGroup.parentElement;
 
 
-course.taken = true;
-course.takeable = true;
+    if (
+        container.counter + course.credits >
+        container.max
+    ) {
+
+        const rect =
+            document.getElementById(
+                courseCode
+            );
+
+        const x =
+            parseFloat(
+                rect.getAttribute("x")
+            );
+
+        const y =
+            parseFloat(
+                rect.getAttribute("y")
+            );
+
+        const width =
+            parseFloat(
+                rect.getAttribute("width")
+            );
+
+        const messageGroup =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "g"
+            );
+
+        messageGroup.setAttribute(
+            "class",
+            "course-limit-message"
+        );
+
+        const background =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "rect"
+            );
+
+        const text =
+            document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "text"
+            );
+
+        const message =
+            "Credit limit reached";
+
+        const messageWidth = 150;
+        const messageHeight = 28;
 
 
-updateCourseColor(
-    course
-);
+        background.setAttribute(
+            "x",
+            x + width / 2 - messageWidth / 2
+        );
 
+        background.setAttribute(
+            "y",
+            y - messageHeight - 8
+        );
+
+        background.setAttribute(
+            "width",
+            messageWidth
+        );
+
+        background.setAttribute(
+            "height",
+            messageHeight
+        );
+
+        background.setAttribute(
+            "class",
+            "course-limit-message-background"
+        );
+
+
+        text.setAttribute(
+            "x",
+            x + width / 2
+        );
+
+        text.setAttribute(
+            "y",
+            y - 19
+        );
+
+        text.setAttribute(
+            "text-anchor",
+            "middle"
+        );
+
+        text.setAttribute(
+            "dominant-baseline",
+            "middle"
+        );
+
+        text.setAttribute(
+            "class",
+            "course-limit-message-text"
+        );
+
+        text.textContent = message;
+
+
+        messageGroup.appendChild(
+            background
+        );
+
+        messageGroup.appendChild(
+            text
+        );
+
+        mapContent.appendChild(
+            messageGroup
+        );
+
+
+        setTimeout(function() {
+
+            messageGroup.remove();
+
+        }, 2000);
+
+
+        updateCourseColor(
+            course
+        );
+
+        return false;
+    }
+
+
+    course.taken = true;
+    course.takeable = true;
+
+
+    addCourseCredits(course);
+
+    container.counter += course.credits;
+
+
+    document.getElementById(
+        container.id + "Title"
+    ).textContent =
+        container.counter + "/" +
+        container.max +
+        " CREDITS COMPLETED";
+
+
+    updateCourseColor(
+        course
+    );
+
+
+    if (courseGroup) {
+
+        courseGroup.classList.add(
+            "newly-unlocked"
+        );
+
+
+        setTimeout(function() {
+
+            courseGroup.classList.remove(
+                "newly-unlocked"
+            );
+
+        }, 3000);
+    }
+
+
+    for (
+        const prevCode of course.prev
+    ) {
+
+        const prevCourse =
+            courses[prevCode];
+
+        if (!prevCourse.taken) {
+
+            const success =
+                unlockBackwards(
+                    prevCourse
+                );
+
+            if (!success) {
+                return false;
+            }
+        }
+    }
+
+
+    return true;
 }
 
 // --------------------------------------------------

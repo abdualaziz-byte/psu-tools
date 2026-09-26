@@ -45,7 +45,6 @@ const COLORED_ARROW_OPACITY = 1;
 // PULSE
 // --------------------------------------------------
 
-const TAKEABLE_PULSE_COLOR = "#374151";
 const HOVER_PULSE_COLOR = "#06b6d4";
 
 const pulsePaths = {};
@@ -91,67 +90,6 @@ function setArrowColored(connectionName, color) {
 
 
 // --------------------------------------------------
-// START TAKEABLE PULSE
-// --------------------------------------------------
-
-function startTakeablePulse(courseCode) {
-
-    const course = courses[courseCode];
-
-    for (const prevCode of course.prev) {
-
-        const connectionName =
-            arrowRegistry[prevCode].next[courseCode];
-
-        const paths =
-            pulsePaths[connectionName];
-
-        if (paths === undefined) {
-            continue;
-        }
-
-        if (currentHoverCourseCode === prevCode) {
-            continue;
-        }
-
-        paths.takeable.style.stroke =
-            TAKEABLE_PULSE_COLOR;
-
-        paths.takeable.classList.add(
-            "is-pulsing"
-        );
-    }
-}
-
-
-// --------------------------------------------------
-// STOP TAKEABLE PULSE
-// --------------------------------------------------
-
-function stopTakeablePulse(courseCode) {
-
-    const course = courses[courseCode];
-
-    for (const prevCode of course.prev) {
-
-        const connectionName =
-            arrowRegistry[prevCode].next[courseCode];
-
-        const paths =
-            pulsePaths[connectionName];
-
-        if (paths === undefined) {
-            continue;
-        }
-
-        paths.takeable.classList.remove(
-            "is-pulsing"
-        );
-    }
-}
-
-
-// --------------------------------------------------
 // START HOVER PULSE
 // --------------------------------------------------
 
@@ -171,23 +109,16 @@ function startArrowPulse(courseCode) {
         const connectionName =
             arrowRegistry[courseCode].next[nextCode];
 
-        const paths =
+        const path =
             pulsePaths[connectionName];
 
-        if (paths === undefined) {
+        if (path === undefined) {
             continue;
         }
 
+        path.style.stroke = color;
 
-        // Hover pulse takes visual priority.
-        paths.takeable.classList.remove(
-            "is-pulsing"
-        );
-
-
-        paths.hover.style.stroke = color;
-
-        paths.hover.classList.add(
+        path.classList.add(
             "is-pulsing"
         );
     }
@@ -209,34 +140,19 @@ function stopArrowPulse(courseCode) {
         const connectionName =
             arrowRegistry[courseCode].next[nextCode];
 
-        const paths =
+        const path =
             pulsePaths[connectionName];
 
-        if (paths === undefined) {
+        if (path === undefined) {
             continue;
         }
 
-
-        paths.hover.classList.remove(
+        path.classList.remove(
             "is-pulsing"
         );
-
-
-        if (courses[nextCode].takeable) {
-
-            paths.takeable.style.stroke =
-                TAKEABLE_PULSE_COLOR;
-
-            paths.takeable.classList.add(
-                "is-pulsing"
-            );
-        }
     }
 }
 
-
-window.startTakeablePulse = startTakeablePulse;
-window.stopTakeablePulse = stopTakeablePulse;
 
 window.startArrowPulse = startArrowPulse;
 window.stopArrowPulse = stopArrowPulse;
@@ -287,31 +203,37 @@ const shapePins = {};
 
 for (const courseCode of generatedCourses) {
 
-    const rect = document.getElementById(courseCode);
+    const rect =
+        document.getElementById(courseCode);
 
-    const x = parseFloat(
-        rect.getAttribute("x")
-    );
+    const x =
+        parseFloat(
+            rect.getAttribute("x")
+        );
 
-    const y = parseFloat(
-        rect.getAttribute("y")
-    );
+    const y =
+        parseFloat(
+            rect.getAttribute("y")
+        );
 
-    const width = parseFloat(
-        rect.getAttribute("width")
-    );
+    const width =
+        parseFloat(
+            rect.getAttribute("width")
+        );
 
-    const height = parseFloat(
-        rect.getAttribute("height")
-    );
+    const height =
+        parseFloat(
+            rect.getAttribute("height")
+        );
 
-    const shape = new Avoid.Rectangle(
-        new Avoid.Point(x, y),
-        new Avoid.Point(
-            x + width,
-            y + height
-        )
-    );
+    const shape =
+        new Avoid.Rectangle(
+            new Avoid.Point(x, y),
+            new Avoid.Point(
+                x + width,
+                y + height
+            )
+        );
 
     const shapeRef =
         new Avoid.ShapeRef(
@@ -319,7 +241,8 @@ for (const courseCode of generatedCourses) {
             shape
         );
 
-    shapeRefs[courseCode] = shapeRef;
+    shapeRefs[courseCode] =
+        shapeRef;
 
 
     const topPin =
@@ -366,7 +289,8 @@ const arrowSegments = {};
 
 for (const courseCode of generatedCourses) {
 
-    const course = courses[courseCode];
+    const course =
+        courses[courseCode];
 
     for (const nextCode of course.next) {
 
@@ -425,16 +349,26 @@ router.processTransaction();
 
 for (const item of connections) {
 
-    const connection = item.connection;
-    const connectionName = item.name;
+    const connection =
+        item.connection;
 
-    const route = connection.displayRoute();
+    const connectionName =
+        item.name;
+
+    const route =
+        connection.displayRoute();
+
     const routePoints = [];
 
 
-    for (let i = 0; i < route.size(); i++) {
+    for (
+        let i = 0;
+        i < route.size();
+        i++
+    ) {
 
-        const point = route.get_ps(i);
+        const point =
+            route.get_ps(i);
 
         routePoints.push({
             x: point.get_x(),
@@ -503,15 +437,17 @@ for (const item of connections) {
             arrow
         );
 
-        mapContent.appendChild(arrow);
+        mapContent.appendChild(
+            arrow
+        );
     }
 
 
     // ----------------------------------------------
-    // TAKEABLE PULSE PATH
+    // HOVER PULSE PATH
     // ----------------------------------------------
 
-    const takeablePath =
+    const hoverPath =
         document.createElementNS(
             "http://www.w3.org/2000/svg",
             "path"
@@ -533,38 +469,6 @@ for (const item of connections) {
     }
 
 
-    takeablePath.setAttribute(
-        "d",
-        pathData
-    );
-
-    takeablePath.setAttribute(
-        "pathLength",
-        "1000"
-    );
-
-    takeablePath.setAttribute(
-        "class",
-        "arrow-pulse"
-    );
-
-    takeablePath.setAttribute(
-        "pointer-events",
-        "none"
-    );
-
-
-    // ----------------------------------------------
-    // HOVER PULSE PATH
-    // ----------------------------------------------
-
-    const hoverPath =
-        document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "path"
-        );
-
-
     hoverPath.setAttribute(
         "d",
         pathData
@@ -586,15 +490,9 @@ for (const item of connections) {
     );
 
 
-    pulsePaths[connectionName] = {
-        takeable: takeablePath,
-        hover: hoverPath
-    };
+    pulsePaths[connectionName] =
+        hoverPath;
 
-
-    mapContent.appendChild(
-        takeablePath
-    );
 
     mapContent.appendChild(
         hoverPath
@@ -631,6 +529,7 @@ function fadePreviousBranch(course) {
     }
 }
 
+
 window.fadePreviousBranch =
     fadePreviousBranch;
 
@@ -659,6 +558,7 @@ function restorePreviousBranch(course) {
         }
     }
 }
+
 
 window.restorePreviousBranch =
     restorePreviousBranch;
@@ -699,6 +599,7 @@ function restoreFifoArrows(courseCode) {
             if (
                 courses[followingCode].taken
             ) {
+
                 shouldFade = true;
                 break;
             }
@@ -712,6 +613,7 @@ function restoreFifoArrows(courseCode) {
             );
 
         }
+
         else {
 
             setArrowRegular(
@@ -855,6 +757,7 @@ function removeFromFifo(courseCode) {
         courseCode
     );
 }
+
 
 window.addToFifo =
     addToFifo;

@@ -169,3 +169,165 @@
     opacity: 0;
     transform: scale(1.15);
 }
+
+
+
+/* -------------------------------------------------- */
+/* NEWLY UNLOCKED */
+/* -------------------------------------------------- */
+
+
+.course-node-group.newly-unlocked {
+    animation: unlockShine 0.8s ease-in-out 4;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+@keyframes unlockShine {
+
+    0% {
+        transform: scale(1);
+        filter:
+            drop-shadow(0 0 0px rgba(255, 215, 0, 0))
+            drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+    }
+
+    40% {
+        transform: scale(1.12);
+        filter:
+            drop-shadow(0 0 6px rgba(255, 215, 0, 1))
+            drop-shadow(0 0 18px rgba(255, 200, 0, 1))
+            drop-shadow(0 0 32px rgba(255, 180, 0, 0.9));
+    }
+
+    60% {
+        transform: scale(1.08);
+        filter:
+            drop-shadow(0 0 10px rgba(255, 215, 0, 1))
+            drop-shadow(0 0 25px rgba(255, 200, 0, 1))
+            drop-shadow(0 0 40px rgba(255, 180, 0, 0.8));
+    }
+
+    100% {
+        transform: scale(1);
+        filter:
+            drop-shadow(0 0 0px rgba(255, 215, 0, 0))
+            drop-shadow(0 0 0px rgba(255, 215, 0, 0));
+    }
+
+}
+/* S T YLING OF COUNTERS
+*/
+/* CREDIT / TRACKER TEXT */
+
+#Credithours {
+    font-size: 30px;
+    font-weight: 700;
+    fill: #2563eb;
+    letter-spacing: 1px;
+    paint-order: stroke;
+    stroke: #1e3a8a;
+    stroke-width: 1px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+/* SECTION TITLES + SECTION CREDIT COUNTERS */
+
+.map-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-anchor: middle;
+    paint-order: stroke;
+    stroke-width: 1px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+/* PROGRAM CORE */
+
+.map-title-core {
+    fill: #2563eb;
+    stroke: #1e3a8a;
+}
+
+/* CS ELECTIVES */
+
+.map-title-elective {
+    fill: #8b5cf6;
+    stroke: #5b21b6;
+}
+
+/* BUSINESS */
+
+.map-title-business {
+    fill: #16a34a;
+    stroke: #166534;
+}
+
+/* PHYSICAL EDUCATION */
+
+.map-title-pe {
+    fill: #f97316;
+    stroke: #c2410c;
+}
+
+/* FREE ELECTIVES */
+
+.map-title-free {
+    fill: #64748b;
+    stroke: #334155;
+}
+
+/* DIGITAL TRANSFORMATION */
+
+.map-title-dx {
+    fill: #eab308;
+    stroke: #854d0e;
+}
+
+/* CYBER SECURITY */
+
+.map-title-cys {
+    fill: #06b6d4;
+    stroke: #155e75;
+}
+
+/* AI & DATA SCIENCE */
+
+.map-title-ai {
+    fill: #ef4444;
+    stroke: #991b1b;
+}
+
+/* UNIVERSITY */
+
+.map-title-university {
+    fill: #000000;
+    stroke: #000000;
+}
+
+/* COLLEGE */
+
+.map-title-college {
+    fill: #000000;
+    stroke: #000000;
+}
+/* ERROR MESSAGES */ 
+
+   .course-limit-message-background {
+    fill: rgba(254, 226, 226, 0.92);
+    stroke: #dc2626;
+    stroke-width: 1.5px;
+    rx: 6px;
+}
+
+.course-limit-message-text {
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-weight: 600;
+    fill: #991b1b;
+    pointer-events: none;
+}
+
+
+
