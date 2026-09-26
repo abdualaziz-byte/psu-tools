@@ -101,7 +101,6 @@ function generateCsElectives(id, x, y) {
     generateCourse("CS439", id);
     generateCourse("CS455", id);
     generateCourse("CS460", id);
-    generateCourse("CS476", id);
     generateCourse("CS489", id);
     generateCourse("CS495", id);
     generateCourse("IS/SE/CYS/DMS3XX/4XX", id);
@@ -294,7 +293,13 @@ function generateCYS403(id, x, y) {
 
 function generateAIDataScienceCore(id, x, y) {
 
-    generateContainer(id, x, y, aiCoreCount);
+    generateGrandparentContainer(
+        id,
+        x,
+        y,
+        aiCoreCount,
+        "CS Electives"
+    );
 
     generateSmallCourse("CS316", id);
     generateSmallCourse("CS465", id);
@@ -315,12 +320,20 @@ function generateAIDataScienceCore(id, x, y) {
 
 function generateAIDataScienceElectives(id, x, y) {
 
-    generateContainer(id, x, y, aiElectiveCount);
+    generateGrandparentContainer(
+        id,
+        x,
+        y,
+        aiElectiveCount,
+        "CS Electives"
+    );
 
     generateSmallCourse("CS469", id);
     generateSmallCourse("CS471", id);
     generateSmallCourse("CS481", id);
     generateSmallCourse("CS496", id);
+    generateSmallCourse("CS476", id);
+
 
     makeTitle(id, "0/" + aiElectiveCount + " CREDITS COMPLETED");
 

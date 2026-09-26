@@ -193,3 +193,17 @@ sectionTitle.textContent = titleText;
 
 mapContent.appendChild(sectionTitle);
 }
+
+
+function generateGrandparentContainer(id, x, y, max, grandparent) {
+
+    generateContainer(id, x, y, max);
+
+    const container =
+        document.getElementById(id);
+
+    const parentContainer =
+        document.getElementById(grandparent);
+
+    parentContainer.appendChild(container);
+}

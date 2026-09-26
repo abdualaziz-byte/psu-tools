@@ -1,374 +1,308 @@
-let courseCode;
+    let courseCode;
 
-let holdTimer = null;
-let holdAnimation = null;
-let holdCourseCode = null;
-let holdCircle = null;
+    let holdTimer = null;
+    let holdAnimation = null;
+    let holdCourseCode = null;
+    let holdCircle = null;
 
-let ignoreNextClick = null;
+    let ignoreNextClick = null;
 
-const HOLD_TIME = 700;
-const OVERLAY_DELAY = 250;
+    const HOLD_TIME = 700;
+    const OVERLAY_DELAY = 250;
 
-///credit calcuation 
-
-
+    ///credit calcuation 
 
 
-let totalCredits = 0;
 
-function addCourseCredits(course) {
-    totalCredits += course.credits;
 
-    document.getElementById("Credithours").textContent =
-        totalCredits + "/" + maxcredits + " CREDITS COMPLETED" +
-        (totalCredits >= maxcredits ? " 🎉" : "");
-}
+    let totalCredits = 0;
 
-function removeCourseCredits(course) {
-    totalCredits -= course.credits;
+    function addCourseCredits(course) {
+        totalCredits += course.credits;
 
-    document.getElementById("Credithours").textContent =
-        totalCredits + "/" + maxcredits + " CREDITS COMPLETED";
-}
+        document.getElementById("Credithours").textContent =
+            totalCredits + "/" + maxcredits + " CREDITS COMPLETED" +
+            (totalCredits >= maxcredits ? " 🎉" : "");
+    }
 
-// --------------------------------------------------
-// HOLD COLORS
-// --------------------------------------------------
+    function removeCourseCredits(course) {
+        totalCredits -= course.credits;
 
-const holdColors = [
-{
-position: 0,
-color: [239, 68, 68]
-},
+        document.getElementById("Credithours").textContent =
+            totalCredits + "/" + maxcredits + " CREDITS COMPLETED";
+    }
 
-{
-    position: 0.35,
-    color: [245, 120, 45]
-},
+    // --------------------------------------------------
+    // HOLD COLORS
+    // --------------------------------------------------
 
-{
-    position: 0.68,
-    color: [235, 190, 45]
-},
+    const holdColors = [
+    {
+    position: 0,
+    color: [239, 68, 68]
+    },
 
-{
-    position: 1,
-    color: [22, 140, 60]
-}
-];
+    {
+        position: 0.35,
+        color: [245, 120, 45]
+    },
 
-function interpolateColor(color1, color2, amount) {
+    {
+        position: 0.68,
+        color: [235, 190, 45]
+    },
 
-const r =
-    Math.round(
-        color1[0] +
-        (color2[0] - color1[0]) * amount
-    );
+    {
+        position: 1,
+        color: [22, 140, 60]
+    }
+    ];
 
-const g =
-    Math.round(
-        color1[1] +
-        (color2[1] - color1[1]) * amount
-    );
+    function interpolateColor(color1, color2, amount) {
 
-const b =
-    Math.round(
-        color1[2] +
-        (color2[2] - color1[2]) * amount
-    );
+    const r =
+        Math.round(
+            color1[0] +
+            (color2[0] - color1[0]) * amount
+        );
 
-return `rgb(${r}, ${g}, ${b})`;
+    const g =
+        Math.round(
+            color1[1] +
+            (color2[1] - color1[1]) * amount
+        );
 
-}
+    const b =
+        Math.round(
+            color1[2] +
+            (color2[2] - color1[2]) * amount
+        );
 
-function getHoldColor(progress) {
+    return `rgb(${r}, ${g}, ${b})`;
 
-for (let i = 0; i < holdColors.length - 1; i++) {
+    }
 
-    const current = holdColors[i];
-    const next = holdColors[i + 1];
+    function getHoldColor(progress) {
 
-    if (
-        progress >= current.position &&
-        progress <= next.position
-    ) {
+    for (let i = 0; i < holdColors.length - 1; i++) {
 
-        const localProgress =
-            (progress - current.position) /
-            (next.position - current.position);
+        const current = holdColors[i];
+        const next = holdColors[i + 1];
 
-        return interpolateColor(
-            current.color,
-            next.color,
-            localProgress
+        if (
+            progress >= current.position &&
+            progress <= next.position
+        ) {
+
+            const localProgress =
+                (progress - current.position) /
+                (next.position - current.position);
+
+            return interpolateColor(
+                current.color,
+                next.color,
+                localProgress
+            );
+        }
+    }
+
+    return "rgb(34, 197, 94)";
+
+    }
+
+    // --------------------------------------------------
+    // GET COURSE CODE
+    // --------------------------------------------------
+
+    function getCourseCodeFromEvent(event) {
+
+    let code = event.target.id;
+
+    if (code === "") {
+        code = event.target.textContent;
+    }
+
+    return code;
+
+    }
+
+    // --------------------------------------------------
+    // HOVER OVERLAY
+    // --------------------------------------------------
+
+    function hideHoverOverlay() {
+
+    const overlays =
+        document.querySelectorAll(".course-info");
+
+    for (const overlay of overlays) {
+
+        overlay.classList.add(
+            "hold-hidden"
         );
     }
-}
 
-return "rgb(34, 197, 94)";
+    }
 
-}
+    function restoreHoverOverlay() {
 
-// --------------------------------------------------
-// GET COURSE CODE
-// --------------------------------------------------
+    const overlays =
+        document.querySelectorAll(".course-info");
 
-function getCourseCodeFromEvent(event) {
+    for (const overlay of overlays) {
 
-let code = event.target.id;
+        overlay.classList.remove(
+            "hold-hidden"
+        );
+    }
 
-if (code === "") {
-    code = event.target.textContent;
-}
+    }
 
-return code;
+    // --------------------------------------------------
+    // CREATE HOLD CIRCLE
+    // --------------------------------------------------
 
-}
+    function createHoldCircle(rect) {
 
-// --------------------------------------------------
-// HOVER OVERLAY
-// --------------------------------------------------
+    const x =
+        parseFloat(
+            rect.getAttribute("x")
+        );
 
-function hideHoverOverlay() {
+    const y =
+        parseFloat(
+            rect.getAttribute("y")
+        );
 
-const overlays =
-    document.querySelectorAll(".course-info");
+    const width =
+        parseFloat(
+            rect.getAttribute("width")
+        );
 
-for (const overlay of overlays) {
+    const height =
+        parseFloat(
+            rect.getAttribute("height")
+        );
 
-    overlay.classList.add(
-        "hold-hidden"
-    );
-}
 
-}
+    const centerX =
+        x + width / 2;
 
-function restoreHoverOverlay() {
+    const centerY =
+        y + height / 2;
 
-const overlays =
-    document.querySelectorAll(".course-info");
 
-for (const overlay of overlays) {
+    const radius =
+        Math.min(width, height) / 2 + 7;
 
-    overlay.classList.remove(
-        "hold-hidden"
-    );
-}
 
-}
+    const circumference =
+        2 * Math.PI * radius;
 
-// --------------------------------------------------
-// CREATE HOLD CIRCLE
-// --------------------------------------------------
 
-function createHoldCircle(rect) {
+    holdCircle =
+        document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle"
+        );
 
-const x =
-    parseFloat(
-        rect.getAttribute("x")
-    );
 
-const y =
-    parseFloat(
-        rect.getAttribute("y")
-    );
-
-const width =
-    parseFloat(
-        rect.getAttribute("width")
+    holdCircle.setAttribute(
+        "cx",
+        centerX
     );
 
-const height =
-    parseFloat(
-        rect.getAttribute("height")
+    holdCircle.setAttribute(
+        "cy",
+        centerY
     );
 
+    holdCircle.setAttribute(
+        "r",
+        radius
+    );
 
-const centerX =
-    x + width / 2;
-
-const centerY =
-    y + height / 2;
-
-
-const radius =
-    Math.min(width, height) / 2 + 7;
-
-
-const circumference =
-    2 * Math.PI * radius;
-
-
-holdCircle =
-    document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "circle"
+    holdCircle.setAttribute(
+        "class",
+        "hold-unlock-circle"
     );
 
 
-holdCircle.setAttribute(
-    "cx",
-    centerX
-);
+    holdCircle.style.strokeDasharray =
+        circumference;
 
-holdCircle.setAttribute(
-    "cy",
-    centerY
-);
-
-holdCircle.setAttribute(
-    "r",
-    radius
-);
-
-holdCircle.setAttribute(
-    "class",
-    "hold-unlock-circle"
-);
+    holdCircle.style.strokeDashoffset =
+        circumference;
 
 
-holdCircle.style.strokeDasharray =
-    circumference;
-
-holdCircle.style.strokeDashoffset =
-    circumference;
-
-
-holdCircle.style.setProperty(
-    "--circle-length",
-    circumference
-);
+    holdCircle.style.setProperty(
+        "--circle-length",
+        circumference
+    );
 
 
-mapContent.appendChild(
-    holdCircle
-);
+    mapContent.appendChild(
+        holdCircle
+    );
 
-}
+    }
 
-// --------------------------------------------------
-// START HOLD
-// --------------------------------------------------
+    // --------------------------------------------------
+    // START HOLD
+    // --------------------------------------------------
 
-function startHold(event) {
+    function startHold(event) {
 
-const code =
-    getCourseCodeFromEvent(event);
+    const code =
+        getCourseCodeFromEvent(event);
 
-const course =
-    courses[code];
-
-
-if (!course) {
-    return;
-}
+    const course =
+        courses[code];
 
 
-// Only locked courses can be held
-if (
-    course.taken ||
-    course.takeable
-) {
-    return;
-}
+    if (!course) {
+        return;
+    }
 
 
-const rect =
-    document.getElementById(code);
-
-
-if (rect === null) {
-    return;
-}
-
-
-holdCourseCode = code;
-
-
-// Hide information overlay
-hideHoverOverlay();
-
-
-// Create circular progress
-createHoldCircle(rect);
-
-
-const startTime =
-    performance.now();
-
-
-// ----------------------------------------------
-// COLOR ANIMATION
-// ----------------------------------------------
-
-function animateHold(currentTime) {
-
+    // Only locked courses can be held
     if (
-        holdCourseCode !== code
+        course.taken ||
+        course.takeable
     ) {
         return;
     }
 
 
-    const elapsed =
-        currentTime - startTime;
+    const rect =
+        document.getElementById(code);
 
 
-    const progress =
-        Math.min(
-            elapsed / HOLD_TIME,
-            1
-        );
-
-
-    // Change course color
-    rect.setAttribute(
-        "fill",
-        getHoldColor(progress)
-    );
-
-
-    // Update circle progress
-    if (holdCircle !== null) {
-
-        const circumference =
-            parseFloat(
-                holdCircle.style
-                    .getPropertyValue(
-                        "--circle-length"
-                    )
-            );
-
-
-        holdCircle.style.strokeDashoffset =
-            circumference *
-            (1 - progress);
+    if (rect === null) {
+        return;
     }
 
 
-    if (progress < 1) {
-
-        holdAnimation =
-            requestAnimationFrame(
-                animateHold
-            );
-    }
-}
+    holdCourseCode = code;
 
 
-holdAnimation =
-    requestAnimationFrame(
-        animateHold
-    );
+    // Hide information overlay
+    hideHoverOverlay();
 
 
-// ----------------------------------------------
-// COMPLETE HOLD
-// ----------------------------------------------
+    // Create circular progress
+    createHoldCircle(rect);
 
-holdTimer =
-    setTimeout(function() {
+
+    const startTime =
+        performance.now();
+
+
+    // ----------------------------------------------
+    // COLOR ANIMATION
+    // ----------------------------------------------
+
+    function animateHold(currentTime) {
 
         if (
             holdCourseCode !== code
@@ -377,592 +311,960 @@ holdTimer =
         }
 
 
+        const elapsed =
+            currentTime - startTime;
+
+
+        const progress =
+            Math.min(
+                elapsed / HOLD_TIME,
+                1
+            );
+
+
+        // Change course color
+        rect.setAttribute(
+            "fill",
+            getHoldColor(progress)
+        );
+
+
+        // Update circle progress
+        if (holdCircle !== null) {
+
+            const circumference =
+                parseFloat(
+                    holdCircle.style
+                        .getPropertyValue(
+                            "--circle-length"
+                        )
+                );
+
+
+            holdCircle.style.strokeDashoffset =
+                circumference *
+                (1 - progress);
+        }
+
+
+        if (progress < 1) {
+
+            holdAnimation =
+                requestAnimationFrame(
+                    animateHold
+                );
+        }
+    }
+
+
+    holdAnimation =
+        requestAnimationFrame(
+            animateHold
+        );
+
+
+    // ----------------------------------------------
+    // COMPLETE HOLD
+    // ----------------------------------------------
+
+    holdTimer =
+        setTimeout(function() {
+
+            if (
+                holdCourseCode !== code
+            ) {
+                return;
+            }
+
+
+            const course =
+                courses[code];
+
+
+            if (!course) {
+
+                clearHold();
+
+                return;
+            }
+
+
+            // Make sure the course ends green
+            rect.setAttribute(
+                "fill",
+                "rgb(34, 197, 94)"
+            );
+
+
+            // Small completion animation
+            if (holdCircle !== null) {
+
+                holdCircle.classList.add(
+                    "hold-complete"
+                );
+            }
+
+
+            // Recursively unlock prerequisites
+            unlockBackwards(course);
+
+
+            // Only the course the user
+            // actually held enters FIFO
+
+
+            // Prevent the click generated
+            // by pointerup
+            ignoreNextClick = code;
+
+
+            // Finish the hold state
+            finishHold();
+
+
+        }, HOLD_TIME);
+
+    }
+
+    // --------------------------------------------------
+    // FINISH SUCCESSFUL HOLD
+    // --------------------------------------------------
+
+    function finishHold() {
+
+    if (holdTimer !== null) {
+
+        clearTimeout(
+            holdTimer
+        );
+
+        holdTimer = null;
+    }
+
+
+    if (holdAnimation !== null) {
+
+        cancelAnimationFrame(
+            holdAnimation
+        );
+
+        holdAnimation = null;
+    }
+
+
+    const completedCircle =
+        holdCircle;
+
+
+    holdCircle = null;
+
+
+    if (completedCircle !== null) {
+
+        setTimeout(function() {
+
+            completedCircle.remove();
+
+        }, 180);
+    }
+
+
+    holdCourseCode = null;
+
+
+    // Let the completion animation
+    // breathe before showing overlay.
+    setTimeout(function() {
+
+        restoreHoverOverlay();
+
+    }, OVERLAY_DELAY);
+
+    }
+
+    // --------------------------------------------------
+    // CANCEL HOLD
+    // --------------------------------------------------
+
+    function clearHold() {
+
+    if (holdTimer !== null) {
+
+        clearTimeout(
+            holdTimer
+        );
+
+        holdTimer = null;
+    }
+
+
+    if (holdAnimation !== null) {
+
+        cancelAnimationFrame(
+            holdAnimation
+        );
+
+        holdAnimation = null;
+    }
+
+
+    if (holdCourseCode !== null) {
+
+        const rect =
+            document.getElementById(
+                holdCourseCode
+            );
+
         const course =
-            courses[code];
+            courses[holdCourseCode];
+
+
+        // If the user released early,
+        // return the course to locked.
+        if (
+            rect !== null &&
+            course !== undefined &&
+            !course.taken &&
+            !course.takeable
+        ) {
+
+            rect.setAttribute(
+                "fill",
+                "red"
+            );
+        }
+    }
+
+
+    if (holdCircle !== null) {
+
+        holdCircle.remove();
+
+        holdCircle = null;
+    }
+
+
+    holdCourseCode = null;
+
+
+    restoreHoverOverlay();
+
+    }
+
+    // --------------------------------------------------
+    // POINTER EVENTS
+    // --------------------------------------------------
+
+    mapContent.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        startHold(event);
+
+    }
+
+    );
+
+    mapContent.addEventListener(
+    "pointerup",
+    function(event) {
+
+        if (
+            holdCourseCode === null
+        ) {
+            return;
+        }
+
+
+        clearHold();
+
+    }
+
+    );
+
+    mapContent.addEventListener(
+    "pointercancel",
+    function(event) {
+
+        clearHold();
+
+    }
+
+    );
+
+    // --------------------------------------------------
+    // NORMAL CLICK
+    // --------------------------------------------------
+
+    mapContent.addEventListener(
+    "click",
+    function(event) {
+
+        courseCode =
+            getCourseCodeFromEvent(
+                event
+            );
+
+
+        if (courseCode === "") {
+            return;
+        }
+
+
+        const course =
+            courses[courseCode];
 
 
         if (!course) {
+            return;
+        }
 
-            clearHold();
+
+        // Completed hold already handled
+        // this click.
+        if (
+            ignoreNextClick === courseCode
+        ) {
+
+            ignoreNextClick = null;
 
             return;
         }
 
 
-        // Make sure the course ends green
-        rect.setAttribute(
-            "fill",
-            "rgb(34, 197, 94)"
-        );
+        // ------------------------------------------
+        // CASE 1: TAKEN
+        // ------------------------------------------
+
+        if (course.taken) {
+
+            turnOffCourse(course);
 
 
-        // Small completion animation
-        if (holdCircle !== null) {
+            // The course clicked becomes takeable
+            course.takeable = true;
 
-            holdCircle.classList.add(
-                "hold-complete"
+
+            updateCourseColor(
+                course
             );
         }
 
 
-        // Recursively unlock prerequisites
-        unlockBackwards(course);
+        // ------------------------------------------
+        // CASE 2: TAKEABLE
+        // ------------------------------------------
+
+        else if (course.takeable) {
+
+            turnOnCourse(course);
+        }
 
 
-        // Only the course the user
-        // actually held enters FIFO
+        // ------------------------------------------
+        // CASE 3: LOCKED
+        // ------------------------------------------
 
+        else {
 
-        // Prevent the click generated
-        // by pointerup
-        ignoreNextClick = code;
+            // Locked courses require holding.
+            return;
+        }
 
+    }
 
-        // Finish the hold state
-        finishHold();
-
-
-    }, HOLD_TIME);
-
-}
-
-// --------------------------------------------------
-// FINISH SUCCESSFUL HOLD
-// --------------------------------------------------
-
-function finishHold() {
-
-if (holdTimer !== null) {
-
-    clearTimeout(
-        holdTimer
     );
 
-    holdTimer = null;
-}
+    // --------------------------------------------------
+    // INITIAL COURSE COLORS
+    // --------------------------------------------------
 
-
-if (holdAnimation !== null) {
-
-    cancelAnimationFrame(
-        holdAnimation
-    );
-
-    holdAnimation = null;
-}
-
-
-const completedCircle =
-    holdCircle;
-
-
-holdCircle = null;
-
-
-if (completedCircle !== null) {
-
-    setTimeout(function() {
-
-        completedCircle.remove();
-
-    }, 180);
-}
-
-
-holdCourseCode = null;
-
-
-// Let the completion animation
-// breathe before showing overlay.
-setTimeout(function() {
-
-    restoreHoverOverlay();
-
-}, OVERLAY_DELAY);
-
-}
-
-// --------------------------------------------------
-// CANCEL HOLD
-// --------------------------------------------------
-
-function clearHold() {
-
-if (holdTimer !== null) {
-
-    clearTimeout(
-        holdTimer
-    );
-
-    holdTimer = null;
-}
-
-
-if (holdAnimation !== null) {
-
-    cancelAnimationFrame(
-        holdAnimation
-    );
-
-    holdAnimation = null;
-}
-
-
-if (holdCourseCode !== null) {
-
-    const rect =
-        document.getElementById(
-            holdCourseCode
-        );
-
-    const course =
-        courses[holdCourseCode];
-
-
-    // If the user released early,
-    // return the course to locked.
-    if (
-        rect !== null &&
-        course !== undefined &&
-        !course.taken &&
-        !course.takeable
+    for (
+    const courseCode of generatedCourses
     ) {
-
-        rect.setAttribute(
-            "fill",
-            "red"
-        );
-    }
-}
-
-
-if (holdCircle !== null) {
-
-    holdCircle.remove();
-
-    holdCircle = null;
-}
-
-
-holdCourseCode = null;
-
-
-restoreHoverOverlay();
-
-}
-
-// --------------------------------------------------
-// POINTER EVENTS
-// --------------------------------------------------
-
-mapContent.addEventListener(
-"pointerdown",
-function(event) {
-
-    startHold(event);
-
-}
-
-);
-
-mapContent.addEventListener(
-"pointerup",
-function(event) {
-
-    if (
-        holdCourseCode === null
-    ) {
-        return;
-    }
-
-
-    clearHold();
-
-}
-
-);
-
-mapContent.addEventListener(
-"pointercancel",
-function(event) {
-
-    clearHold();
-
-}
-
-);
-
-// --------------------------------------------------
-// NORMAL CLICK
-// --------------------------------------------------
-
-mapContent.addEventListener(
-"click",
-function(event) {
-
-    courseCode =
-        getCourseCodeFromEvent(
-            event
-        );
-
-
-    if (courseCode === "") {
-        return;
-    }
-
 
     const course =
         courses[courseCode];
 
 
     if (!course) {
-        return;
+
+        console.log(
+            "UNDEFINED:",
+            courseCode
+        );
+
+        continue;
     }
 
 
-    // Completed hold already handled
-    // this click.
+    const rect =
+        document.getElementById(
+            courseCode
+        );
+
+
+    if (rect === null) {
+        continue;
+    }
+
+
     if (
-        ignoreNextClick === courseCode
+        course.prev.length === 0
     ) {
 
-        ignoreNextClick = null;
+        rect.setAttribute(
+            "fill",
+            "yellow"
+        );
 
+        course.takeable = true;
+
+    }
+    else {
+
+        rect.setAttribute(
+            "fill",
+            "red"
+        );
+    }
+
+    }
+
+    // --------------------------------------------------
+    // TURN OFF COURSE
+    // --------------------------------------------------
+
+    function turnOffCourse(course) {
+
+
+    for (
+            const nextCode of course.next
+        ) {
+
+            const nextCourse =
+                courses[nextCode];
+
+
+            if (!nextCourse.taken) {
+
+                nextCourse.taken = false;
+                nextCourse.takeable = false;
+
+                updateCourseColor(
+                    nextCourse
+                );
+
+                continue;
+            }
+
+
+            turnOffCourse(
+                nextCourse
+            );
+        }
+
+
+        const courseCode =
+            Object.keys(courses).find(
+                key => courses[key] === course
+            );
+
+
+        const courseGroup =
+            document.getElementById(
+                courseCode + "Group"
+            );
+
+
+        const container =
+            courseGroup.parentElement;
+
+    const grandparent =
+        container.parentElement;
+
+    if (grandparent !== mapContent) {
+        turnOffGrandparentCourse(course);
         return;
     }
 
+        course.taken = false;
 
-    // ------------------------------------------
-    // CASE 1: TAKEN
-    // ------------------------------------------
+        removeCourseCredits(course);
 
-    if (course.taken) {
+        container.counter -= course.credits;
 
-        turnOffCourse(course);
+        document.getElementById(
+            container.id + "Title"
+        ).textContent =
+            container.counter + "/" + container.max + " CREDITS COMPLETED";
 
-
-        // The course clicked becomes takeable
-        course.takeable = true;
+        course.takeable = false;
 
 
         updateCourseColor(
             course
         );
+
+
+        window.removeFromFifo(
+            courseCode
+        );
+
+
+        window.restorePreviousBranch(
+            course
+        );
     }
+    /// TURN OFF FOR GRANDPARENT CASE
 
 
-    // ------------------------------------------
-    // CASE 2: TAKEABLE
-    // ------------------------------------------
+    function turnOffGrandparentCourse(course) {
 
-    else if (course.takeable) {
-
-        turnOnCourse(course);
-    }
-
-
-    // ------------------------------------------
-    // CASE 3: LOCKED
-    // ------------------------------------------
-
-    else {
-
-        // Locked courses require holding.
-        return;
-    }
-
-}
-
-);
-
-// --------------------------------------------------
-// INITIAL COURSE COLORS
-// --------------------------------------------------
-
-for (
-const courseCode of generatedCourses
-) {
-
-const course =
-    courses[courseCode];
-
-
-if (!course) {
-
-    console.log(
-        "UNDEFINED:",
-        courseCode
-    );
-
-    continue;
-}
-
-
-const rect =
-    document.getElementById(
-        courseCode
-    );
-
-
-if (rect === null) {
-    continue;
-}
-
-
-if (
-    course.prev.length === 0
-) {
-
-    rect.setAttribute(
-        "fill",
-        "yellow"
-    );
-
-    course.takeable = true;
-
-}
-else {
-
-    rect.setAttribute(
-        "fill",
-        "red"
-    );
-}
-
-}
-
-// --------------------------------------------------
-// TURN OFF COURSE
-// --------------------------------------------------
-
-function turnOffCourse(course) {
-  for (
-        const nextCode of course.next
-    ) {
-
-        const nextCourse =
-            courses[nextCode];
-
-
-        if (!nextCourse.taken) {
-
-            nextCourse.taken = false;
-            nextCourse.takeable = false;
-
-            updateCourseColor(
-                nextCourse
+        const courseCode =
+            Object.keys(courses).find(
+                key => courses[key] === course
             );
 
-            continue;
-        }
+        const courseGroup =
+            document.getElementById(
+                courseCode + "Group"
+            );
+
+        const container =
+            courseGroup.parentElement;
+
+        const grandparent =
+            container.parentElement;
 
 
-        turnOffCourse(
-            nextCourse
+        course.taken = false;
+
+        removeCourseCredits(course);
+
+        container.counter -= course.credits;
+
+        grandparent.counter -= course.credits;
+
+
+        document.getElementById(
+            container.id + "Title"
+        ).textContent =
+            container.counter + "/" +
+            container.max +
+            " CREDITS COMPLETED";
+
+
+        document.getElementById(
+            grandparent.id + "Title"
+        ).textContent =
+            grandparent.counter + "/" +
+            grandparent.max +
+            " CREDITS COMPLETED";
+
+
+        course.takeable = false;
+
+
+        updateCourseColor(
+            course
+        );
+
+
+        window.removeFromFifo(
+            courseCode
+        );
+
+
+        window.restorePreviousBranch(
+            course
         );
     }
+    // --------------------------------------------------
+    // TURN ON COURSE
+    // --------------------------------------------------
 
+    function turnOnCourse(course) {
 
-    const courseCode =
-        Object.keys(courses).find(
-            key => courses[key] === course
+    
+        const courseCode =
+            Object.keys(courses).find(
+                key => courses[key] === course
+            );
+
+        const courseGroup =
+            document.getElementById(courseCode + "Group");
+
+        const container =
+            courseGroup.parentElement;
+    const grandparent =
+        container.parentElement;
+        
+    if (grandparent !== mapContent) {
+        turnOnGrandparentCourse(course);
+        return;
+    }
+    if (container.counter >= container.max) {
+
+        const rect = document.getElementById(courseCode);
+
+        const x = parseFloat(rect.getAttribute("x"));
+        const y = parseFloat(rect.getAttribute("y"));
+        const width = parseFloat(rect.getAttribute("width"));
+
+        const messageGroup = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "g"
         );
 
-
-    const courseGroup =
-        document.getElementById(
-            courseCode + "Group"
+        messageGroup.setAttribute(
+            "class",
+            "course-limit-message"
         );
 
+        const background = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "rect"
+        );
 
-    const container =
-        courseGroup.parentElement;
+        const text = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "text"
+        );
 
+        const message = "Credit limit reached";
 
-    course.taken = false;
+        const messageWidth = 150;
+        const messageHeight = 28;
 
-    removeCourseCredits(course);
+        background.setAttribute(
+            "x",
+            x + width / 2 - messageWidth / 2
+        );
 
-    container.counter -= course.credits;
+        background.setAttribute(
+            "y",
+            y - messageHeight - 8
+        );
+
+        background.setAttribute(
+            "width",
+            messageWidth
+        );
+
+        background.setAttribute(
+            "height",
+            messageHeight
+        );
+
+        background.setAttribute(
+            "class",
+            "course-limit-message-background"
+        );
+
+        text.setAttribute(
+            "x",
+            x + width / 2
+        );
+
+        text.setAttribute(
+            "y",
+            y - 19
+        );
+
+        text.setAttribute(
+            "text-anchor",
+            "middle"
+        );
+
+        text.setAttribute(
+            "dominant-baseline",
+            "middle"
+        );
+
+        text.setAttribute(
+            "class",
+            "course-limit-message-text"
+        );
+
+        text.textContent = message;
+
+        messageGroup.appendChild(background);
+        messageGroup.appendChild(text);
+
+        mapContent.appendChild(messageGroup);
+
+        setTimeout(function() {
+            messageGroup.remove();
+        }, 2000);
+
+        return;}
+
+        container.counter += course.credits;
 
     document.getElementById(
         container.id + "Title"
     ).textContent =
         container.counter + "/" + container.max + " CREDITS COMPLETED";
 
-    course.takeable = false;
+    course.taken = true;
 
+        addCourseCredits(course);
 
-    updateCourseColor(
-        course
-    );
+        updateCourseColor(course);
 
+        window.addToFifo(courseCode);
+        window.fadePreviousBranch(course);
 
-    window.removeFromFifo(
-        courseCode
-    );
+        for (const nextCode of course.next) {
+            const nextCourse = courses[nextCode];
+            let canTake = true;
 
+            for (const prevCode of nextCourse.prev) {
+                if (!courses[prevCode].taken) {
+                    canTake = false;
+                    break;
+                }
+            }
 
-    window.restorePreviousBranch(
-        course
-    );
-}
-
-// --------------------------------------------------
-// TURN ON COURSE
-// --------------------------------------------------
-
-function turnOnCourse(course) {
-
-   
-    const courseCode =
-        Object.keys(courses).find(
-            key => courses[key] === course
-        );
-
-    const courseGroup =
-        document.getElementById(courseCode + "Group");
-
-    const container =
-        courseGroup.parentElement;
-
-  if (container.counter >= container.max) {
-
-    const rect = document.getElementById(courseCode);
-
-    const x = parseFloat(rect.getAttribute("x"));
-    const y = parseFloat(rect.getAttribute("y"));
-    const width = parseFloat(rect.getAttribute("width"));
-
-    const messageGroup = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "g"
-    );
-
-    messageGroup.setAttribute(
-        "class",
-        "course-limit-message"
-    );
-
-    const background = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "rect"
-    );
-
-    const text = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "text"
-    );
-
-    const message = "Credit limit reached";
-
-    const messageWidth = 150;
-    const messageHeight = 28;
-
-    background.setAttribute(
-        "x",
-        x + width / 2 - messageWidth / 2
-    );
-
-    background.setAttribute(
-        "y",
-        y - messageHeight - 8
-    );
-
-    background.setAttribute(
-        "width",
-        messageWidth
-    );
-
-    background.setAttribute(
-        "height",
-        messageHeight
-    );
-
-    background.setAttribute(
-        "class",
-        "course-limit-message-background"
-    );
-
-    text.setAttribute(
-        "x",
-        x + width / 2
-    );
-
-    text.setAttribute(
-        "y",
-        y - 19
-    );
-
-    text.setAttribute(
-        "text-anchor",
-        "middle"
-    );
-
-    text.setAttribute(
-        "dominant-baseline",
-        "middle"
-    );
-
-    text.setAttribute(
-        "class",
-        "course-limit-message-text"
-    );
-
-    text.textContent = message;
-
-    messageGroup.appendChild(background);
-    messageGroup.appendChild(text);
-
-    mapContent.appendChild(messageGroup);
-
-    setTimeout(function() {
-        messageGroup.remove();
-    }, 2000);
-
-    return;}
-
-    container.counter += course.credits;
-
-document.getElementById(
-    container.id + "Title"
-).textContent =
-    container.counter + "/" + container.max + " CREDITS COMPLETED";
-
-course.taken = true;
-
-    addCourseCredits(course);
-
-    updateCourseColor(course);
-
-    window.addToFifo(courseCode);
-    window.fadePreviousBranch(course);
-
-    for (const nextCode of course.next) {
-        const nextCourse = courses[nextCode];
-        let canTake = true;
-
-        for (const prevCode of nextCourse.prev) {
-            if (!courses[prevCode].taken) {
-                canTake = false;
-                break;
+            if (canTake) {
+                nextCourse.takeable = true;
+                updateCourseColor(nextCourse);
             }
         }
 
-        if (canTake) {
-            nextCourse.takeable = true;
-            updateCourseColor(nextCourse);
-        }
     }
+    // TURN ON GRANDPARENT CASE
+    function turnOnGrandparentCourse(course) {
 
-}
+        const courseCode =
+            Object.keys(courses).find(
+                key => courses[key] === course
+            );
 
-// --------------------------------------------------
-// UNLOCK BACKWARDS
-// --------------------------------------------------
+
+        const courseGroup =
+            document.getElementById(
+                courseCode + "Group"
+            );
 
 
-function unlockBackwards(course) {
+        const container =
+            courseGroup.parentElement;
+
+
+        const grandparent =
+            container.parentElement;
+
+
+        if (
+            grandparent.counter >=
+            grandparent.max
+        ) {
+
+            const rect =
+                document.getElementById(
+                    courseCode
+                );
+
+
+            const x =
+                parseFloat(
+                    rect.getAttribute("x")
+                );
+
+
+            const y =
+                parseFloat(
+                    rect.getAttribute("y")
+                );
+
+
+            const width =
+                parseFloat(
+                    rect.getAttribute("width")
+                );
+
+
+            const messageGroup =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "g"
+                );
+
+
+            messageGroup.setAttribute(
+                "class",
+                "course-limit-message"
+            );
+
+
+            const background =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "rect"
+                );
+
+
+            const text =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "text"
+                );
+
+
+            const message =
+                "Credit limit reached";
+
+
+            const messageWidth = 150;
+            const messageHeight = 28;
+
+
+            background.setAttribute(
+                "x",
+                x + width / 2 - messageWidth / 2
+            );
+
+
+            background.setAttribute(
+                "y",
+                y - messageHeight - 8
+            );
+
+
+            background.setAttribute(
+                "width",
+                messageWidth
+            );
+
+
+            background.setAttribute(
+                "height",
+                messageHeight
+            );
+
+
+            background.setAttribute(
+                "class",
+                "course-limit-message-background"
+            );
+
+
+            text.setAttribute(
+                "x",
+                x + width / 2
+            );
+
+
+            text.setAttribute(
+                "y",
+                y - 19
+            );
+
+
+            text.setAttribute(
+                "text-anchor",
+                "middle"
+            );
+
+
+            text.setAttribute(
+                "dominant-baseline",
+                "middle"
+            );
+
+
+            text.setAttribute(
+                "class",
+                "course-limit-message-text"
+            );
+
+
+            text.textContent =
+                message;
+
+
+            messageGroup.appendChild(
+                background
+            );
+
+
+            messageGroup.appendChild(
+                text
+            );
+
+
+            mapContent.appendChild(
+                messageGroup
+            );
+
+
+            setTimeout(function() {
+
+                messageGroup.remove();
+
+            }, 2000);
+
+
+            updateCourseColor(
+                course
+            );
+
+
+            return false;
+        }
+
+
+        course.taken = true;
+        course.takeable = true;
+
+
+        addCourseCredits(
+            course
+        );
+
+
+        container.counter +=
+            course.credits;
+
+
+        grandparent.counter +=
+            course.credits;
+
+
+        document.getElementById(
+            container.id + "Title"
+        ).textContent =
+            container.counter + "/" +
+            container.max +
+            " CREDITS COMPLETED";
+
+
+        document.getElementById(
+            grandparent.id + "Title"
+        ).textContent =
+            grandparent.counter + "/" +
+            grandparent.max +
+            " CREDITS COMPLETED";
+
+
+        updateCourseColor(
+            course
+        );
+
+
+        return true;
+    }
+    ///
+
+
+    // --------------------------------------------------
+    // UNLOCK BACKWARDS
+    // --------------------------------------------------
+
+
+   function unlockBackwards(course) {
 
     if (course.taken) {
         course.takeable = true;
@@ -975,6 +1277,255 @@ function unlockBackwards(course) {
             key => courses[key] === course
         );
 
+
+    const courseGroup =
+        document.getElementById(
+            courseCode + "Group"
+        );
+
+
+    const container =
+        courseGroup.parentElement;
+
+    const grandparent =
+        container.parentElement;
+
+
+    if (grandparent !== mapContent) {
+
+        const success =
+            UnlockGrandparentCourse(course);
+
+        if (!success) {
+            return false;
+        }
+
+    }
+    else {
+
+        if (
+            container.counter + course.credits >
+            container.max
+        ) {
+
+            const rect =
+                document.getElementById(
+                    courseCode
+                );
+
+            const x =
+                parseFloat(
+                    rect.getAttribute("x")
+                );
+
+            const y =
+                parseFloat(
+                    rect.getAttribute("y")
+                );
+
+            const width =
+                parseFloat(
+                    rect.getAttribute("width")
+                );
+
+            const messageGroup =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "g"
+                );
+
+            messageGroup.setAttribute(
+                "class",
+                "course-limit-message"
+            );
+
+
+            const background =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "rect"
+                );
+
+
+            const text =
+                document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "text"
+                );
+
+
+            const message =
+                "Credit limit reached";
+
+            const messageWidth = 150;
+            const messageHeight = 28;
+
+
+            background.setAttribute(
+                "x",
+                x + width / 2 - messageWidth / 2
+            );
+
+
+            background.setAttribute(
+                "y",
+                y - messageHeight - 8
+            );
+
+
+            background.setAttribute(
+                "width",
+                messageWidth
+            );
+
+
+            background.setAttribute(
+                "height",
+                messageHeight
+            );
+
+
+            background.setAttribute(
+                "class",
+                "course-limit-message-background"
+            );
+
+
+            text.setAttribute(
+                "x",
+                x + width / 2
+            );
+
+
+            text.setAttribute(
+                "y",
+                y - 19
+            );
+
+
+            text.setAttribute(
+                "text-anchor",
+                "middle"
+            );
+
+
+            text.setAttribute(
+                "dominant-baseline",
+                "middle"
+            );
+
+
+            text.setAttribute(
+                "class",
+                "course-limit-message-text"
+            );
+
+
+            text.textContent = message;
+
+
+            messageGroup.appendChild(
+                background
+            );
+
+
+            messageGroup.appendChild(
+                text
+            );
+
+
+            mapContent.appendChild(
+                messageGroup
+            );
+
+
+            setTimeout(function() {
+
+                messageGroup.remove();
+
+            }, 2000);
+
+
+            updateCourseColor(
+                course
+            );
+
+            return false;
+        }
+
+
+        course.taken = true;
+        course.takeable = true;
+
+
+        addCourseCredits(course);
+
+        container.counter += course.credits;
+
+
+        document.getElementById(
+            container.id + "Title"
+        ).textContent =
+            container.counter + "/" +
+            container.max +
+            " CREDITS COMPLETED";
+
+
+        updateCourseColor(
+            course
+        );
+
+
+        if (courseGroup) {
+
+            courseGroup.classList.add(
+                "newly-unlocked"
+            );
+
+
+            setTimeout(function() {
+
+                courseGroup.classList.remove(
+                    "newly-unlocked"
+                );
+
+            }, 3000);
+        }
+    }
+
+
+    for (
+        const prevCode of course.prev
+    ) {
+
+        const prevCourse =
+            courses[prevCode];
+
+        if (!prevCourse.taken) {
+
+            const success =
+                unlockBackwards(
+                    prevCourse
+                );
+
+            if (!success) {
+                return false;
+            }
+        }
+    }
+
+
+    return true;
+}
+    ///// GRAND PARENT CASE BACKWARDS 
+
+
+    function UnlockGrandparentCourse(course) {
+  const courseCode =
+        Object.keys(courses).find(
+            key => courses[key] === course
+        );
+
     const courseGroup =
         document.getElementById(
             courseCode + "Group"
@@ -983,10 +1534,13 @@ function unlockBackwards(course) {
     const container =
         courseGroup.parentElement;
 
+    const grandparent =
+        container.parentElement;
+
 
     if (
-        container.counter + course.credits >
-        container.max
+        grandparent.counter >=
+        grandparent.max
     ) {
 
         const rect =
@@ -1090,7 +1644,8 @@ function unlockBackwards(course) {
             "course-limit-message-text"
         );
 
-        text.textContent = message;
+        text.textContent =
+            message;
 
 
         messageGroup.appendChild(
@@ -1124,10 +1679,16 @@ function unlockBackwards(course) {
     course.taken = true;
     course.takeable = true;
 
+    addCourseCredits(
+        course
+    );
 
-    addCourseCredits(course);
 
-    container.counter += course.credits;
+    container.counter +=
+        course.credits;
+
+    grandparent.counter +=
+        course.credits;
 
 
     document.getElementById(
@@ -1138,108 +1699,78 @@ function unlockBackwards(course) {
         " CREDITS COMPLETED";
 
 
+    document.getElementById(
+        grandparent.id + "Title"
+    ).textContent =
+        grandparent.counter + "/" +
+        grandparent.max +
+        " CREDITS COMPLETED";
+
+
     updateCourseColor(
         course
     );
 
 
-    if (courseGroup) {
+    return true;
+     
+    }
+    // --------------------------------------------------
+    // UPDATE COURSE COLOR
+    // --------------------------------------------------
 
-        courseGroup.classList.add(
-            "newly-unlocked"
+    function updateCourseColor(course) {
+
+    const courseCode =
+        Object.keys(courses).find(
+            key => courses[key] === course
         );
 
 
-        setTimeout(function() {
+    const rect =
+        document.getElementById(
+            courseCode
+        );
 
-            courseGroup.classList.remove(
-                "newly-unlocked"
-            );
 
-        }, 3000);
+    if (rect === null) {
+        return;
     }
 
 
-    for (
-        const prevCode of course.prev
-    ) {
-
-        const prevCourse =
-            courses[prevCode];
-
-        if (!prevCourse.taken) {
-
-            const success =
-                unlockBackwards(
-                    prevCourse
-                );
-
-            if (!success) {
-                return false;
-            }
-        }
-    }
-
-
-    return true;
-}
-
-// --------------------------------------------------
-// UPDATE COURSE COLOR
-// --------------------------------------------------
-
-function updateCourseColor(course) {
-
-const courseCode =
-    Object.keys(courses).find(
-        key => courses[key] === course
-    );
-
-
-const rect =
-    document.getElementById(
+    console.log(
+        "COURSE:",
         courseCode
     );
 
-
-if (rect === null) {
-    return;
-}
-
-
-console.log(
-    "COURSE:",
-    courseCode
-);
-
-console.log(
-    "RECT:",
-    rect
-);
-
-
-if (course.taken) {
-
-    rect.setAttribute(
-        "fill",
-        "green"
+    console.log(
+        "RECT:",
+        rect
     );
 
-}
-else if (course.takeable) {
 
-    rect.setAttribute(
-        "fill",
-        "yellow"
-    );
+    if (course.taken) {
 
-}
-else {
+        rect.setAttribute(
+            "fill",
+            "green"
+        );
 
-    rect.setAttribute(
-        "fill",
-        "red"
-    );
-}
+    }
+    else if (course.takeable) {
 
-}
+        rect.setAttribute(
+            "fill",
+            "yellow"
+        );
+
+    }
+    else {
+
+        rect.setAttribute(
+            "fill",
+            "red"
+        );
+    }
+
+    }
